@@ -1,6 +1,12 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/Navbar'
+import { DM_Sans } from 'next/font/google'
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+})
 
 export const metadata: Metadata = {
   title: 'eFootball Tournaments',
@@ -14,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="az">
-      <body className="min-h-screen bg-[#06070a] text-white antialiased">
+      <body className={`${dmSans.className} min-h-screen bg-[#06070a] text-white antialiased`}>
         <div className="relative min-h-screen overflow-x-hidden">
           <div className="pointer-events-none absolute inset-0 -z-10">
             <div className="absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
