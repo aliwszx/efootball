@@ -173,10 +173,7 @@ export async function joinTournament(formData: FormData) {
   // Hələlik mock payment success
   const { error: paymentUpdateError } = await supabase
   .from('payments')
-  .update({
-    status: 'completed',
-    provider_payment_id: `mock_${crypto.randomUUID()}`,
-  })
+  status: 'pending'
   .eq('registration_id', registration.id)
 
   if (paymentUpdateError) {
