@@ -53,12 +53,7 @@ export default async function Home() {
                 Turnirlərə bax
               </Link>
 
-              <Link
-                href="/dashboard"
-                className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 text-center font-medium text-white backdrop-blur transition hover:bg-white/10"
-              >
-                Dashboard
-              </Link>
+              
             </div>
           </div>
 
