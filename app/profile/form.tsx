@@ -11,7 +11,7 @@ type ProfileFormProps = {
 
 const initialState: UpdateUsernameState = {}
 
-export default function ProfileForm({ currentUsername, email }: ProfileFormProps) {
+export default function ProfileForm({ currentUsername, email, payments }: ProfileFormProps) {
   const [username, setUsername] = useState(currentUsername)
   const [state, formAction, pending] = useActionState(updateUsername, initialState)
 
