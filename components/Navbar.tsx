@@ -74,7 +74,7 @@ export default async function SiteHeader() {
                 {username || user.email}
               </span>
 
-              <form action="/auth/signout" method="post">
+              <form action="/login" method="post">
                 <button
                   type="submit"
                   className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-2.5 text-sm font-medium text-red-200 transition hover:bg-red-500/20"
