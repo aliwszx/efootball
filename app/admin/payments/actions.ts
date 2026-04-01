@@ -84,13 +84,14 @@ export async function updatePaymentStatus(
       registrationStatus = 'rejected'
     }
 
-    const { error: registrationUpdateError } = await supabase
-      .from('tournament_registrations')
-      .update({
-        status: registrationStatus,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('id', payment.registration_id)
+   const { error: registrationUpdateError } = await supabase
+  .from('tournament_registrations')
+  .update({
+    registration_status: registrationStatus,
+    payment_status: status === 'completed' ? 'paid' : 'pending',
+    updated_at: new Date().toISOString(),
+  })
+  .eq('id', payment.registration_id)
 
     if (registrationUpdateError) {
       return {
