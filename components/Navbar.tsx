@@ -47,6 +47,12 @@ export default async function SiteHeader() {
           >
             Turnirlər
           </Link>
+          <Link
+  href="/leaderboard"
+  className="text-sm text-zinc-200 transition hover:text-cyan-300"
+>
+  Leaderboard
+</Link>
 
           {user && (
             <Link
