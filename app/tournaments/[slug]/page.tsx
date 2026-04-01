@@ -122,20 +122,26 @@ export default async function TournamentDetailPage({
 
             {players && players.length > 0 ? (
               <div className="flex flex-wrap gap-3">
-                {players.map((player: any) => {
-                  const profile = Array.isArray(player.profiles)
-                    ? player.profiles[0]
-                    : player.profiles
+               {players.map((player: any, index: number) => {
+  const profile = Array.isArray(player.profiles)
+    ? player.profiles[0]
+    : player.profiles
 
-                  return (
-                    <div
-                      key={player.id}
-                      className="rounded-xl border border-white/10 bg-black/20 px-4 py-2 text-sm text-white"
-                    >
-                      {profile?.username || 'user'}
-                    </div>
-                  )
-                })}
+  return (
+    <div
+      key={player.id}
+      className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/20 px-4 py-2 text-sm text-white"
+    >
+      <span className="text-cyan-400 font-semibold">
+        #{index + 1}
+      </span>
+
+      <span>
+        {profile?.username || 'user'}
+      </span>
+    </div>
+  )
+})}
               </div>
             ) : (
               <p className="text-sm text-zinc-400">Hələ qoşulan yoxdur.</p>
