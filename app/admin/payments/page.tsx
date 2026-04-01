@@ -116,6 +116,13 @@ export default async function AdminPaymentsPage() {
                     </div>
 
                     <div className="rounded-2xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
+                      <p className="text-xs uppercase tracking-wide text-zinc-500">Registration ID</p>
+                      <p className="mt-1 break-all text-sm text-white">
+                        {payment.registration_id || '-'}
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-white/10 bg-black/20 p-4 sm:col-span-2">
                       <p className="text-xs uppercase tracking-wide text-zinc-500">User ID</p>
                       <p className="mt-1 break-all text-sm text-white">{payment.user_id || '-'}</p>
                     </div>
