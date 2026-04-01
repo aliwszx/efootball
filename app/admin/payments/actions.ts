@@ -77,21 +77,17 @@ export async function updatePaymentStatus(
 
   if (payment.registration_id) {
     let registrationStatus: 'pending' | 'confirmed' | 'cancelled' = 'pending'
-    let paymentStatus: 'pending' | 'paid' = 'pending'
 
     if (status === 'completed') {
       registrationStatus = 'confirmed'
-      paymentStatus = 'paid'
     } else if (status === 'failed') {
       registrationStatus = 'cancelled'
-      paymentStatus = 'pending'
     }
 
     const { error: registrationUpdateError } = await supabase
       .from('tournament_registrations')
       .update({
         registration_status: registrationStatus,
-        payment_status: paymentStatus,
         updated_at: new Date().toISOString(),
       })
       .eq('id', payment.registration_id)
