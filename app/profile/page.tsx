@@ -38,7 +38,7 @@ export default async function ProfilePage() {
             </Link>
 
             <Link
-              href="/my-tournaments"
+              href="/dashboard/my-tournaments"
               className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium transition hover:bg-white/10"
             >
               Mənim turnirlərim
