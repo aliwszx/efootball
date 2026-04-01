@@ -44,6 +44,11 @@ export default async function AdminPage() {
       description: 'Ödənişləri idarə et',
       href: '/admin/payments',
     },
+    {
+  title: 'Leaderboard',
+  description: 'Xalları idarə et',
+  href: '/admin/leaderboard',
+},
   ]
 
   return (
