@@ -88,7 +88,28 @@ const { data: players } = await supabase
             {tournament.description ||
               'Bu turnir üçün həyəcanlı rəqabət və premium iştirak təcrübəsi.'}
           </p>
+<div className="mt-6">
+  <h3 className="text-lg font-semibold mb-3">
+    Qoşulanlar ({players?.length || 0})
+  </h3>
 
+  {players && players.length > 0 ? (
+    <div className="flex flex-wrap gap-3">
+      {players.map((p: any) => (
+        <div
+          key={p.id}
+          className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm"
+        >
+          {p.profiles?.username || 'user'}
+        </div>
+      ))}
+    </div>
+  ) : (
+    <p className="text-zinc-400 text-sm">
+      Hələ qoşulan yoxdur.
+    </p>
+  )}
+</div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="text-sm text-zinc-400">Entry Fee</p>
