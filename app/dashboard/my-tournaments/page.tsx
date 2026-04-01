@@ -17,7 +17,6 @@ export default async function MyTournamentsPage() {
     .from('tournament_registrations')
     .select(`
       id,
-      payment_status,
       registration_status,
       created_at,
       tournaments (
@@ -28,48 +27,91 @@ export default async function MyTournamentsPage() {
         format,
         start_time,
         status
+      ),
+      payments (
+        id,
+        status,
+        amount,
+        currency,
+        created_at
       )
     `)
     .eq('user_id', user.id)
     .order('created_at', { ascending: false })
 
   return (
-    <main className="min-h-screen px-4 py-10">
+    <main className="min-h-screen px-4 py-10 text-white">
       <div className="mx-auto max-w-4xl">
         <h1 className="mb-6 text-3xl font-bold">Mənim turnirlərim</h1>
 
         {error && (
-          <p className="rounded-lg border border-red-300 bg-red-50 p-4 text-red-700">
+          <p className="rounded-lg border border-red-400/20 bg-red-500/10 p-4 text-red-200">
             Xəta: {error.message}
           </p>
         )}
 
         {!registrations?.length ? (
-          <p>Hələ heç bir turnirə qoşulmamısan.</p>
+          <p className="text-zinc-300">Hələ heç bir turnirə qoşulmamısan.</p>
         ) : (
           <div className="space-y-4">
-            {registrations.map((item: any) => (
-              <div key={item.id} className="rounded-2xl border p-5">
-                <h2 className="mb-2 text-xl font-semibold">
-                  {item.tournaments?.title}
-                </h2>
-                <p className="mb-1">Platform: {item.tournaments?.platform}</p>
-                <p className="mb-1">Format: {item.tournaments?.format}</p>
-                <p className="mb-1">Turnir statusu: {item.tournaments?.status}</p>
-                <p className="mb-1">Qeydiyyat statusu: {item.registration_status}</p>
-                <p className="mb-1">Ödəniş statusu: {item.payment_status}</p>
-                <p className="mb-4">
-                  Başlama vaxtı: {new Date(item.tournaments?.start_time).toLocaleString()}
-                </p>
+            {registrations.map((item: any) => {
+              const tournament = Array.isArray(item.tournaments)
+                ? item.tournaments[0]
+                : item.tournaments
 
-                <Link
-                  href={`/tournaments/${item.tournaments?.slug}`}
-                  className="inline-block rounded-lg border px-4 py-2"
+              const payment = Array.isArray(item.payments)
+                ? item.payments[0]
+                : item.payments
+
+              return (
+                <div
+                  key={item.id}
+                  className="rounded-2xl border border-white/10 bg-white/5 p-5 backdrop-blur-xl"
                 >
-                  Turnirə bax
-                </Link>
-              </div>
-            ))}
+                  <h2 className="mb-2 text-xl font-semibold">
+                    {tournament?.title || 'Adsız turnir'}
+                  </h2>
+
+                  <p className="mb-1 text-zinc-300">
+                    Platform: {tournament?.platform || '-'}
+                  </p>
+
+                  <p className="mb-1 text-zinc-300">
+                    Format: {tournament?.format || '-'}
+                  </p>
+
+                  <p className="mb-1 text-zinc-300">
+                    Turnir statusu: {tournament?.status || '-'}
+                  </p>
+
+                  <p className="mb-1 text-zinc-300">
+                    Qeydiyyat statusu: {item.registration_status || '-'}
+                  </p>
+
+                  <p className="mb-1 text-zinc-300">
+                    Ödəniş statusu: {payment?.status || 'pending'}
+                  </p>
+
+                  <p className="mb-1 text-zinc-300">
+                    Məbləğ: {payment?.amount ?? '-'} {payment?.currency || ''}
+                  </p>
+
+                  <p className="mb-4 text-zinc-300">
+                    Başlama vaxtı:{' '}
+                    {tournament?.start_time
+                      ? new Date(tournament.start_time).toLocaleString()
+                      : '-'}
+                  </p>
+
+                  <Link
+                    href={`/tournaments/${tournament?.slug}`}
+                    className="inline-block rounded-lg border border-white/10 bg-white/5 px-4 py-2 transition hover:bg-white/10"
+                  >
+                    Turnirə bax
+                  </Link>
+                </div>
+              )
+            })}
           </div>
         )}
       </div>
