@@ -4,7 +4,15 @@ import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
 import { getUsernameError, normalizeUsername } from '@/lib/usernames'
 
-export async function updateUsername(formData: FormData) {
+export type UpdateUsernameState = {
+  error?: string
+  success?: string
+}
+
+export async function updateUsername(
+  _prevState: UpdateUsernameState,
+  formData: FormData
+): Promise<UpdateUsernameState> {
   const supabase = await createClient()
 
   const {
@@ -23,12 +31,16 @@ export async function updateUsername(formData: FormData) {
     return { error: usernameError }
   }
 
-  const { data: existing } = await supabase
+  const { data: existing, error: existingError } = await supabase
     .from('profiles')
     .select('id')
     .eq('username', username)
     .neq('id', user.id)
     .maybeSingle()
+
+  if (existingError) {
+    return { error: 'Username yoxlanılarkən xəta baş verdi.' }
+  }
 
   if (existing) {
     return { error: 'Bu username artıq istifadə olunur.' }
@@ -47,8 +59,9 @@ export async function updateUsername(formData: FormData) {
     return { error: 'Username dəyişdirilərkən xəta baş verdi.' }
   }
 
-  revalidatePath('/dashboard')
-  revalidatePath('/dashboard/profile')
+  revalidatePath('/profile')
+  revalidatePath('/tournaments')
+  revalidatePath('/admin')
 
   return { success: 'Username uğurla yeniləndi.' }
 }

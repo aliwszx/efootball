@@ -1,46 +1,30 @@
 export function normalizeUsername(value: string) {
-  return value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9_]/g, '_')
-    .replace(/_+/g, '_')
-    .replace(/^_+|_+$/g, '')
+  return value.trim().toLowerCase().replace(/[^a-z0-9_]/g, '')
 }
 
-export function isValidUsername(value: string) {
-  return /^[a-z0-9_]{3,20}$/.test(value)
-}
-
-export function getUsernameError(value: string) {
-  if (!value) return 'Username daxil etmək vacibdir.'
-  if (value.length < 3) return 'Username ən azı 3 simvol olmalıdır.'
-  if (value.length > 20) return 'Username ən çox 20 simvol olmalıdır.'
-  if (!/^[a-z0-9_]+$/.test(value)) {
+export function getUsernameError(username: string) {
+  if (!username) return 'Username boş ola bilməz.'
+  if (username.length < 3) return 'Username minimum 3 simvol olmalıdır.'
+  if (username.length > 20) return 'Username maksimum 20 simvol olmalıdır.'
+  if (!/^[a-z0-9_]+$/.test(username)) {
     return 'Username yalnız kiçik hərf, rəqəm və underscore (_) ola bilər.'
   }
-
-  return ''
+  return null
 }
 
 export async function generateUniqueUsername(
-  supabase: {
-    from: (table: string) => {
-      select: (columns: string) => {
-        eq: (column: string, value: string) => {
-          maybeSingle: () => Promise<{ data: { id: string } | null }>
-        }
-      }
-    }
-  },
+  supabase: any,
   preferredUsername: string,
-  fallbackSeed: string
+  fallbackSeed = 'player'
 ) {
-  const normalizedBase = normalizeUsername(preferredUsername) || `user_${fallbackSeed}`
-  const base = normalizedBase.slice(0, 20)
+  const normalizedPreferred = normalizeUsername(preferredUsername)
+  const preferred =
+    normalizedPreferred || `player_${normalizeUsername(fallbackSeed).slice(0, 8) || 'user'}`
 
-  for (let i = 0; i < 20; i++) {
-    const candidate = i === 0 ? base : `${base.slice(0, Math.max(1, 20 - String(i).length - 1))}_${i}`
+  let candidate = preferred
+  let counter = 0
 
+  while (counter < 50) {
     const { data } = await supabase
       .from('profiles')
       .select('id')
@@ -50,7 +34,10 @@ export async function generateUniqueUsername(
     if (!data) {
       return candidate
     }
+
+    counter += 1
+    candidate = `${preferred}_${counter}`
   }
 
-  return `user_${fallbackSeed}`.slice(0, 20)
+  return `player_${Date.now().toString().slice(-6)}`
 }
