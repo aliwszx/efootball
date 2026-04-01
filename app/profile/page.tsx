@@ -55,7 +55,11 @@ export default async function ProfilePage() {
         </section>
 
         <div className="mt-8">
-          <ProfileForm currentUsername={username} email={user.email ?? ''} />
+          <ProfileForm
+  currentUsername={username}
+  email={user.email ?? ''}
+  payments={payments || []}
+/>
         </div>
       </div>
     </main>
