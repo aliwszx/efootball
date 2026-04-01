@@ -52,7 +52,12 @@ export default async function Home() {
               >
                 Turnirlərə bax
               </Link>
-
+<Link
+  href="/profile"
+  className="rounded-2xl border border-white/10 bg-white/5 px-6 py-3 font-medium text-white hover:bg-white/10 transition"
+>
+  Profilim
+</Link>
               
             </div>
           </div>
