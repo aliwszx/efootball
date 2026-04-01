@@ -19,14 +19,13 @@ export default async function AdminRegistrationsPage() {
     .single()
 
   if (!profile || profile.role !== 'admin') {
-    redirect('/dashboard')
+    redirect('/profile')
   }
 
   const { data: registrations, error } = await supabase
     .from('tournament_registrations')
     .select(`
       id,
-      payment_status,
       registration_status,
       created_at,
       user_id,
@@ -43,27 +42,34 @@ export default async function AdminRegistrationsPage() {
         platform,
         start_time,
         status
+      ),
+      payments (
+        id,
+        status,
+        amount,
+        currency,
+        created_at
       )
     `)
     .order('created_at', { ascending: false })
 
   return (
-    <main className="min-h-screen px-4 py-10">
+    <main className="min-h-screen px-4 py-10 text-white">
       <div className="mx-auto max-w-6xl">
         <h1 className="mb-6 text-3xl font-bold">Admin Registrations</h1>
 
         {error && (
-          <div className="rounded-lg border border-red-300 bg-red-50 p-4 text-red-700">
+          <div className="rounded-lg border border-red-400/20 bg-red-500/10 p-4 text-red-200">
             Xəta: {error.message}
           </div>
         )}
 
         {!registrations?.length ? (
-          <p>Hələ registration yoxdur.</p>
+          <p className="text-zinc-300">Hələ registration yoxdur.</p>
         ) : (
-          <div className="overflow-x-auto rounded-2xl border">
+          <div className="overflow-x-auto rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl">
             <table className="min-w-full text-sm">
-              <thead className="bg-gray-100 text-left">
+              <thead className="bg-white/5 text-left text-zinc-300">
                 <tr>
                   <th className="p-3">User</th>
                   <th className="p-3">Turnir</th>
@@ -71,31 +77,68 @@ export default async function AdminRegistrationsPage() {
                   <th className="p-3">Turnir statusu</th>
                   <th className="p-3">Registration</th>
                   <th className="p-3">Payment</th>
+                  <th className="p-3">Məbləğ</th>
                   <th className="p-3">Tarix</th>
                 </tr>
               </thead>
-              <tbody>
-                {registrations.map((item: any) => (
-                  <tr key={item.id} className="border-t">
-                    <td className="p-3">
-                      <div className="font-medium">
-                        {item.profiles?.full_name || item.profiles?.username || 'User'}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {item.profiles?.username || item.user_id}
-                      </div>
-                    </td>
 
-                    <td className="p-3">{item.tournaments?.title}</td>
-                    <td className="p-3">{item.tournaments?.platform}</td>
-                    <td className="p-3">{item.tournaments?.status}</td>
-                    <td className="p-3">{item.registration_status}</td>
-                    <td className="p-3">{item.payment_status}</td>
-                    <td className="p-3">
-                      {new Date(item.created_at).toLocaleString()}
-                    </td>
-                  </tr>
-                ))}
+              <tbody>
+                {registrations.map((item: any) => {
+                  const profileData = Array.isArray(item.profiles)
+                    ? item.profiles[0]
+                    : item.profiles
+
+                  const tournament = Array.isArray(item.tournaments)
+                    ? item.tournaments[0]
+                    : item.tournaments
+
+                  const payment = Array.isArray(item.payments)
+                    ? item.payments[0]
+                    : item.payments
+
+                  return (
+                    <tr key={item.id} className="border-t border-white/10">
+                      <td className="p-3">
+                        <div className="font-medium text-white">
+                          {profileData?.full_name || profileData?.username || 'User'}
+                        </div>
+                        <div className="text-xs text-zinc-500">
+                          {profileData?.username || item.user_id}
+                        </div>
+                      </td>
+
+                      <td className="p-3 text-zinc-200">
+                        {tournament?.title || '-'}
+                      </td>
+
+                      <td className="p-3 text-zinc-200">
+                        {tournament?.platform || '-'}
+                      </td>
+
+                      <td className="p-3 text-zinc-200">
+                        {tournament?.status || '-'}
+                      </td>
+
+                      <td className="p-3 text-zinc-200">
+                        {item.registration_status || '-'}
+                      </td>
+
+                      <td className="p-3 text-zinc-200">
+                        {payment?.status || 'pending'}
+                      </td>
+
+                      <td className="p-3 text-zinc-200">
+                        {payment ? `${payment.amount ?? '-'} ${payment.currency || ''}` : '-'}
+                      </td>
+
+                      <td className="p-3 text-zinc-200">
+                        {item.created_at
+                          ? new Date(item.created_at).toLocaleString()
+                          : '-'}
+                      </td>
+                    </tr>
+                  )
+                })}
               </tbody>
             </table>
           </div>
