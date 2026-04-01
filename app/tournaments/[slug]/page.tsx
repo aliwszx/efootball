@@ -2,36 +2,27 @@ import { createClient } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import { joinTournament } from '@/app/actions/tournaments'
 
+type TournamentDetailPageProps = {
+  params: Promise<{ slug: string }>
+}
+
 export default async function TournamentDetailPage({
   params,
-}: {
-  params: Promise<{ slug: string }>
-}) {
+}: TournamentDetailPageProps) {
   const { slug } = await params
   const supabase = await createClient()
-const { data: players } = await supabase
-  .from('tournament_registrations')
-  .select(`
-    id,
-    registration_status,
-    profiles (
-      id,
-      username
-    )
-  `)
-  .eq('tournament_id', tournament.id)
-  .eq('registration_status', 'confirmed')
+
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const { data: tournament } = await supabase
+  const { data: tournament, error: tournamentError } = await supabase
     .from('tournaments')
     .select('*')
     .eq('slug', slug)
     .single()
 
-  if (!tournament) {
+  if (tournamentError || !tournament) {
     notFound()
   }
 
@@ -45,6 +36,19 @@ const { data: players } = await supabase
     .eq('registration_status', 'confirmed')
 
   confirmedCount = count || 0
+
+  const { data: players } = await supabase
+    .from('tournament_registrations')
+    .select(`
+      id,
+      registration_status,
+      profiles (
+        id,
+        username
+      )
+    `)
+    .eq('tournament_id', tournament.id)
+    .eq('registration_status', 'confirmed')
 
   if (user) {
     const { data: registration } = await supabase
@@ -88,47 +92,54 @@ const { data: players } = await supabase
             {tournament.description ||
               'Bu turnir üçün həyəcanlı rəqabət və premium iştirak təcrübəsi.'}
           </p>
-<div className="mt-6">
-  <h3 className="text-lg font-semibold mb-3">
-    Qoşulanlar ({players?.length || 0})
-  </h3>
 
-  {players && players.length > 0 ? (
-    <div className="flex flex-wrap gap-3">
-      {players.map((p: any) => (
-        <div
-          key={p.id}
-          className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 text-sm"
-        >
-          {p.profiles?.username || 'user'}
-        </div>
-      ))}
-    </div>
-  ) : (
-    <p className="text-zinc-400 text-sm">
-      Hələ qoşulan yoxdur.
-    </p>
-  )}
-</div>
           <div className="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="text-sm text-zinc-400">Entry Fee</p>
               <p className="mt-2 text-2xl font-semibold">{tournament.entry_fee} AZN</p>
             </div>
+
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="text-sm text-zinc-400">Prize Pool</p>
               <p className="mt-2 text-2xl font-semibold">{tournament.prize_amount} AZN</p>
             </div>
+
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="text-sm text-zinc-400">Players</p>
               <p className="mt-2 text-2xl font-semibold">
                 {confirmedCount}/{tournament.max_players}
               </p>
             </div>
+
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="text-sm text-zinc-400">Game</p>
               <p className="mt-2 text-2xl font-semibold">{tournament.game}</p>
             </div>
+          </div>
+
+          <div className="mt-10">
+            <h2 className="mb-4 text-2xl font-semibold">Qoşulanlar</h2>
+
+            {players && players.length > 0 ? (
+              <div className="flex flex-wrap gap-3">
+                {players.map((player: any) => {
+                  const profile = Array.isArray(player.profiles)
+                    ? player.profiles[0]
+                    : player.profiles
+
+                  return (
+                    <div
+                      key={player.id}
+                      className="rounded-xl border border-white/10 bg-black/20 px-4 py-2 text-sm text-white"
+                    >
+                      {profile?.username || 'user'}
+                    </div>
+                  )
+                })}
+              </div>
+            ) : (
+              <p className="text-sm text-zinc-400">Hələ qoşulan yoxdur.</p>
+            )}
           </div>
 
           <div className="mt-10">
@@ -196,7 +207,10 @@ const { data: players } = await supabase
             <form action={joinTournament} className="mt-6">
               <input type="hidden" name="tournament_id" value={tournament.id} />
               <input type="hidden" name="tournament_slug" value={tournament.slug} />
-              <button className="w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 py-4 text-base font-semibold text-black transition hover:scale-[1.01] sm:text-lg">
+              <button
+                type="submit"
+                className="w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 py-4 text-base font-semibold text-black transition hover:scale-[1.01] sm:text-lg"
+              >
                 Turnirə qoşul
               </button>
             </form>
