@@ -90,25 +90,64 @@ export async function joinTournament(formData: FormData) {
     redirect('/login')
   }
 
-  const tournamentId = String(formData.get('tournament_id') || '')
-  const tournamentSlug = String(formData.get('tournament_slug') || '')
+  const tournamentId = String(formData.get('tournament_id') || '').trim()
+  const tournamentSlug = String(formData.get('tournament_slug') || '').trim()
 
   if (!tournamentId || !tournamentSlug) {
-    throw new Error('Turnir melumati tapilmadi')
+    redirect('/tournaments?error=missing_tournament')
   }
 
-  const { data: tournament } = await supabase
+  const { data: tournament, error: tournamentError } = await supabase
     .from('tournaments')
-    .select('*')
+    .select('id, slug, title, status, max_players, registration_deadline, entry_fee')
     .eq('id', tournamentId)
     .single()
 
-  if (!tournament) {
-    throw new Error('Turnir tapilmadi')
+  if (tournamentError || !tournament) {
+    redirect('/tournaments?error=tournament_not_found')
   }
 
-  // 1️⃣ registration yarat
-  const { data: registration, error: regError } = await supabase
+  if (tournament.status !== 'open') {
+    redirect(`/tournaments/${tournamentSlug}?error=closed`)
+  }
+
+  const now = new Date()
+  const deadline = new Date(tournament.registration_deadline)
+
+  if (deadline < now) {
+    redirect(`/tournaments/${tournamentSlug}?error=deadline_passed`)
+  }
+
+  const { count, error: countError } = await supabase
+    .from('tournament_registrations')
+    .select('*', { count: 'exact', head: true })
+    .eq('tournament_id', tournament.id)
+    .eq('registration_status', 'confirmed')
+
+  if (countError) {
+    throw new Error(`Count error: ${countError.message}`)
+  }
+
+  if ((count || 0) >= tournament.max_players) {
+    redirect(`/tournaments/${tournamentSlug}?error=full`)
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from('tournament_registrations')
+    .select('id, registration_status')
+    .eq('tournament_id', tournament.id)
+    .eq('user_id', user.id)
+    .maybeSingle()
+
+  if (existingError) {
+    throw new Error(`Existing registration error: ${existingError.message}`)
+  }
+
+  if (existing && existing.registration_status !== 'cancelled') {
+    redirect(`/tournaments/${tournamentSlug}?error=already_joined`)
+  }
+
+  const { data: registration, error: registrationError } = await supabase
     .from('tournament_registrations')
     .insert({
       tournament_id: tournament.id,
@@ -119,11 +158,12 @@ export async function joinTournament(formData: FormData) {
     .select('id')
     .single()
 
-  if (regError || !registration) {
-    throw new Error(regError?.message)
+  if (registrationError || !registration) {
+    throw new Error(
+      `Registration error: ${registrationError?.message || 'registration yaradilarken xeta bas verdi'}`
+    )
   }
 
-  // 2️⃣ payment yarat
   const { error: paymentError } = await supabase
     .from('payments')
     .insert({
@@ -137,13 +177,18 @@ export async function joinTournament(formData: FormData) {
     })
 
   if (paymentError) {
-    throw new Error(paymentError.message)
+    throw new Error(`Payment error: ${paymentError.message}`)
   }
 
-  // ❌ BURDA STOP — heç nə update ETMƏ
+  revalidatePath(`/tournaments/${tournamentSlug}`)
+  revalidatePath('/tournaments')
+  revalidatePath('/profile')
+  revalidatePath('/admin/payments')
+  revalidatePath('/admin/registrations')
 
-  redirect(`/tournaments/${tournamentSlug}`)
+  redirect(`/tournaments/${tournamentSlug}?success=joined_pending`)
 }
+
 export async function setFeaturedTournament(formData: FormData) {
   const supabase = await createClient()
 
