@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
+import { generateUniqueUsername, normalizeUsername } from '@/lib/usernames'
 
 export default async function DashboardPage() {
   const supabase = await createClient()
@@ -20,9 +21,15 @@ export default async function DashboardPage() {
     .maybeSingle()
 
   if (!profile) {
-    const username =
-      user.email?.split('@')[0]?.replace(/[^a-zA-Z0-9_]/g, '_') ||
-      `user_${user.id.slice(0, 8)}`
+    const preferredUsername = normalizeUsername(
+      String(user.user_metadata?.username || user.email?.split('@')[0] || '')
+    )
+
+    const username = await generateUniqueUsername(
+      supabase,
+      preferredUsername,
+      user.id.slice(0, 8)
+    )
 
     await supabase.from('profiles').insert({
       id: user.id,
@@ -43,7 +50,9 @@ export default async function DashboardPage() {
         <p className="text-sm uppercase tracking-[0.2em] text-cyan-300">
           Dashboard
         </p>
-        <h1 className="text-3xl font-bold sm:text-4xl">Xoş gəldin, {user.email}</h1>
+        <h1 className="text-3xl font-bold sm:text-4xl">
+          Xoş gəldin, {freshProfile?.username || user.email}
+        </h1>
         <p className="text-zinc-400">
           Username: {freshProfile?.username} · Role: {freshProfile?.role}
         </p>
@@ -74,10 +83,14 @@ export default async function DashboardPage() {
           <h2 className="mt-2 text-2xl font-semibold">Turnirlər</h2>
         </Link>
 
-        <div className="rounded-[28px] border border-white/10 bg-gradient-to-br from-cyan-400/10 to-blue-500/10 p-6 backdrop-blur-xl">
+        <Link
+          href="/dashboard/profile"
+          className="rounded-[28px] border border-white/10 bg-gradient-to-br from-cyan-400/10 to-blue-500/10 p-6 backdrop-blur-xl transition hover:-translate-y-1 hover:bg-white/[0.07]"
+        >
           <p className="text-sm text-zinc-300">Account</p>
-          <h2 className="mt-2 text-2xl font-semibold">Profil statusu aktivdir</h2>
-        </div>
+          <h2 className="mt-2 text-2xl font-semibold">Profil ayarları</h2>
+          <p className="mt-2 text-sm text-zinc-400">Username dəyişmək üçün daxil ol</p>
+        </Link>
       </div>
 
       {freshProfile?.role === 'admin' && (

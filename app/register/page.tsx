@@ -2,12 +2,15 @@
 
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { getUsernameError, normalizeUsername } from '@/lib/usernames'
 
 export default function RegisterPage() {
   const supabase = createClient()
 
   const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,13 +19,49 @@ export default function RegisterPage() {
     e.preventDefault()
     setError('')
     setMessage('')
+
+    const normalizedUsername = normalizeUsername(username)
+    const usernameError = getUsernameError(normalizedUsername)
+
+    if (usernameError) {
+      setError(usernameError)
+      return
+    }
+
+    if (password.length < 6) {
+      setError('Şifrə ən azı 6 simvol olmalıdır.')
+      return
+    }
+
+    if (password !== confirmPassword) {
+      setError('Şifrələr eyni deyil.')
+      return
+    }
+
     setLoading(true)
+
+    const { data: existingUsername } = await supabase
+      .from('profiles')
+      .select('id')
+      .eq('username', normalizedUsername)
+      .maybeSingle()
+
+    if (existingUsername) {
+      setLoading(false)
+      setError('Bu username artıq istifadə olunur.')
+      return
+    }
+
+    const redirectUrl = `${window.location.origin}/auth/confirm`
 
     const { error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        emailRedirectTo: 'http://localhost:3000/auth/confirm',
+        emailRedirectTo: redirectUrl,
+        data: {
+          username: normalizedUsername,
+        },
       },
     })
 
@@ -34,6 +73,9 @@ export default function RegisterPage() {
     }
 
     setMessage('Email təsdiq linki göndərildi.')
+    setUsername('')
+    setPassword('')
+    setConfirmPassword('')
   }
 
   return (
@@ -58,6 +100,17 @@ export default function RegisterPage() {
           />
 
           <input
+            type="text"
+            placeholder="Username"
+            className="w-full rounded-2xl border border-white/10 bg-black/20 p-4 text-white placeholder:text-zinc-500"
+            value={username}
+            onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
+            minLength={3}
+            maxLength={20}
+            required
+          />
+
+          <input
             type="password"
             placeholder="Şifrə"
             className="w-full rounded-2xl border border-white/10 bg-black/20 p-4 text-white placeholder:text-zinc-500"
@@ -65,7 +118,20 @@ export default function RegisterPage() {
             onChange={(e) => setPassword(e.target.value)}
             required
           />
+
+          <input
+            type="password"
+            placeholder="Şifrəni təkrar et"
+            className="w-full rounded-2xl border border-white/10 bg-black/20 p-4 text-white placeholder:text-zinc-500"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+          />
         </div>
+
+        <p className="mt-3 text-xs text-zinc-500">
+          Username yalnız kiçik hərf, rəqəm və underscore (_) ilə olmalıdır.
+        </p>
 
         {error && (
           <p className="mt-4 rounded-2xl border border-red-400/20 bg-red-500/10 p-3 text-sm text-red-200">
@@ -82,7 +148,7 @@ export default function RegisterPage() {
         <button
           type="submit"
           disabled={loading}
-          className="mt-6 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 p-4 font-semibold text-black transition hover:scale-[1.01]"
+          className="mt-6 w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 p-4 font-semibold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {loading ? 'Loading...' : 'Hesab yarat'}
         </button>
