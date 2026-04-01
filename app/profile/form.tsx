@@ -74,13 +74,53 @@ export default function ProfileForm({ currentUsername, email, payments }: Profil
       </form>
 
       <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl sm:p-8">
-        <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">Billing</p>
-        <h2 className="text-3xl font-bold">Ödənişlərim</h2>
+  <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">Billing</p>
+  <h2 className="text-3xl font-bold">Ödənişlərim</h2>
 
-        <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-5 text-sm text-zinc-300">
-          Hələlik ödəniş tapılmadı.
+  {payments.length === 0 ? (
+    <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-5 text-sm text-zinc-300">
+      Hələlik ödəniş tapılmadı.
+    </div>
+  ) : (
+    <div className="mt-6 space-y-4">
+      {payments.map((payment) => (
+        <div
+          key={payment.id}
+          className="flex items-center justify-between rounded-2xl border border-white/10 bg-black/20 p-4"
+        >
+          <div>
+            <p className="text-sm text-zinc-400">Məbləğ</p>
+            <p className="font-semibold text-white">
+              {payment.amount} {payment.currency}
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-zinc-400">Status</p>
+            <p
+              className={`font-medium ${
+                payment.status === 'completed'
+                  ? 'text-emerald-400'
+                  : payment.status === 'pending'
+                  ? 'text-yellow-400'
+                  : 'text-red-400'
+              }`}
+            >
+              {payment.status}
+            </p>
+          </div>
+
+          <div className="text-right">
+            <p className="text-sm text-zinc-400">Tarix</p>
+            <p className="text-sm text-white">
+              {new Date(payment.created_at).toLocaleDateString()}
+            </p>
+          </div>
         </div>
-      </section>
+      ))}
+    </div>
+  )}
+</section>
     </div>
   )
 }
