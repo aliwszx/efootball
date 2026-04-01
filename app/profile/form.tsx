@@ -6,6 +6,7 @@ import { updateUsername, type UpdateUsernameState } from './actions'
 type ProfileFormProps = {
   currentUsername: string
   email: string
+  payments: any[]
 }
 
 const initialState: UpdateUsernameState = {}
