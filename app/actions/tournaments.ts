@@ -172,12 +172,12 @@ export async function joinTournament(formData: FormData) {
 
   // Hələlik mock payment success
   const { error: paymentUpdateError } = await supabase
-    .from('payments')
-    .update({
-      status: 'paid',
-      provider_payment_id: `mock_${crypto.randomUUID()}`,
-    })
-    .eq('registration_id', registration.id)
+  .from('payments')
+  .update({
+    status: 'completed',
+    provider_payment_id: `mock_${crypto.randomUUID()}`,
+  })
+  .eq('registration_id', registration.id)
 
   if (paymentUpdateError) {
     throw new Error(paymentUpdateError.message)
