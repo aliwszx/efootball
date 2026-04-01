@@ -20,6 +20,12 @@ export default async function ProfilePage() {
     .eq('id', user.id)
     .maybeSingle()
 
+  const { data: payments } = await supabase
+  .from('payments')
+  .select('*')
+  .eq('user_id', user.id)
+  .order('created_at', { ascending: false })
+  
   const username = profile?.username || ''
   const role = profile?.role || 'user'
 
