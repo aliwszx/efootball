@@ -154,7 +154,6 @@ export async function joinTournament(formData: FormData) {
     .insert({
       tournament_id: tournament.id,
       user_id: user.id,
-      payment_status: 'pending',
       registration_status: 'pending',
     })
     .select('id')
