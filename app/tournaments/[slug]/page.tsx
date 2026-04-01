@@ -9,7 +9,18 @@ export default async function TournamentDetailPage({
 }) {
   const { slug } = await params
   const supabase = await createClient()
-
+const { data: players } = await supabase
+  .from('tournament_registrations')
+  .select(`
+    id,
+    registration_status,
+    profiles (
+      id,
+      username
+    )
+  `)
+  .eq('tournament_id', tournament.id)
+  .eq('registration_status', 'confirmed')
   const {
     data: { user },
   } = await supabase.auth.getUser()
