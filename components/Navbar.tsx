@@ -32,8 +32,8 @@ export default function Navbar() {
   useEffect(() => {
     const supabase = createClient()
 
-    const loadUser = async () => {
-      setLoading(true)
+    const loadUser = async (initial = false) => {
+  if (initial) setLoading(true)
 
       const {
         data: { user },
