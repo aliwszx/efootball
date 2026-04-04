@@ -16,25 +16,62 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username, role')
+    .select('username, full_name, avatar_url, role')
     .eq('id', user.id)
     .maybeSingle()
 
   const { data: payments } = await supabase
-  .from('payments')
-  .select('*')
-  .eq('user_id', user.id)
-  .order('created_at', { ascending: false })
-  
+    .from('payments')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
   const username = profile?.username || ''
+  const fullName = profile?.full_name || ''
+  const avatarUrl = profile?.avatar_url || ''
   const role = profile?.role || 'user'
 
   return (
     <main className="min-h-screen bg-[#050816] px-4 py-10 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl">
         <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl sm:p-8">
-          <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">Profile</p>
-          <h1 className="text-3xl font-bold sm:text-5xl">Profilim</h1>
+          <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">
+            Profile
+          </p>
+
+          <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold sm:text-5xl">Profilim</h1>
+              <p className="mt-3 text-sm text-zinc-300">
+                Hesab məlumatlarını idarə et, profil şəklini yenilə və ödənişlərini yoxla.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="h-20 w-20 overflow-hidden rounded-full border border-white/10 bg-white/5">
+                {avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt="Profil şəkli"
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-cyan-300">
+                    {username?.charAt(0)?.toUpperCase() || 'U'}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <p className="text-lg font-semibold">{fullName || username || 'İstifadəçi'}</p>
+                <p className="text-sm text-zinc-400">{user.email ?? ''}</p>
+                <p className="mt-1 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-300">
+                  {role}
+                </p>
+              </div>
+            </div>
+          </div>
+
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/tournaments"
@@ -49,17 +86,18 @@ export default async function ProfilePage() {
             >
               Mənim turnirlərim
             </Link>
-
-            
           </div>
         </section>
 
         <div className="mt-8">
           <ProfileForm
-  currentUsername={username}
-  email={user.email ?? ''}
-  payments={payments || []}
-/>
+            currentUsername={username}
+            fullName={fullName}
+            avatarUrl={avatarUrl}
+            role={role}
+            email={user.email ?? ''}
+            payments={payments || []}
+          />
         </div>
       </div>
     </main>
