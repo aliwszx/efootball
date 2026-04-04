@@ -49,6 +49,11 @@ export default async function AdminPage() {
   description: 'Xalları idarə et',
   href: '/admin/leaderboard',
 },
+    {
+  title: 'Disputes',
+  description: 'Mübahisəli matçları həll et',
+  href: '/admin/disputes',
+},
   ]
 
   return (
