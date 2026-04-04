@@ -17,7 +17,6 @@ export async function updateProfileAvatar(
   formData: FormData
 ): Promise<ProfileActionState> {
   const supabase = await createClient()
-
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -31,11 +30,9 @@ export async function updateProfileAvatar(
   if (!avatar || avatar.size === 0) {
     return { error: 'Şəkil seçilməyib.' }
   }
-
   if (!avatar.type.startsWith('image/')) {
     return { error: 'Yalnız şəkil faylı yükləyə bilərsən.' }
   }
-
   const maxSize = 3 * 1024 * 1024
   if (avatar.size > maxSize) {
     return { error: 'Şəkil maksimum 3 MB ola bilər.' }
@@ -74,6 +71,60 @@ export async function updateProfileAvatar(
   }
 
   revalidatePath('/profile')
-
   return { success: 'Profil şəkli yeniləndi.' }
+}
+
+export async function updateUsername(
+  _prevState: ProfileActionState,
+  formData: FormData
+): Promise<ProfileActionState> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Davam etmək üçün əvvəlcə daxil ol.' }
+  }
+
+  const rawUsername = String(formData.get('username') || '').trim()
+  const username = rawUsername.toLowerCase().replace(/\s+/g, '_')
+
+  if (username.length < 3 || username.length > 20) {
+    return { error: 'Username 3 ilə 20 simvol arasında olmalıdır.' }
+  }
+  if (!/^[a-z0-9_]+$/.test(username)) {
+    return { error: 'Username yalnız hərflər, rəqəmlər və _ işarəsi ola bilər.' }
+  }
+
+  const { data: existing, error: existingError } = await supabase
+    .from('profiles')
+    .select('id')
+    .eq('username', username)
+    .neq('id', user.id)
+    .maybeSingle()
+
+  if (existingError) {
+    return { error: 'Username yoxlanılarkən xəta baş verdi.' }
+  }
+  if (existing) {
+    return { error: 'Bu username artıq istifadə olunur.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ username })
+    .eq('id', user.id)
+
+  if (error) {
+    if (error.message.toLowerCase().includes('duplicate')) {
+      return { error: 'Bu username artıq istifadə olunur.' }
+    }
+    return { error: 'Username dəyişdirilərkən xəta baş verdi.' }
+  }
+
+  revalidatePath('/profile')
+  revalidatePath('/tournaments')
+  revalidatePath('/admin')
+  return { success: 'Username uğurla yeniləndi.' }
 }
