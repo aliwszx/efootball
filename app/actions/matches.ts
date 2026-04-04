@@ -305,8 +305,29 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string)
     return
   }
 
-  const first = rows[0]
-  const second = rows[1]
+// hər participant üçün ən son submission-u götür
+const latestByParticipant = new Map()
+
+for (const row of rows) {
+  latestByParticipant.set(row.submitted_by_participant_id, row)
+}
+
+const latestSubmissions = Array.from(latestByParticipant.values())
+
+if (latestSubmissions.length < 2) {
+  await supabase
+    .from('league_matches')
+    .update({
+      match_status: 'awaiting_confirmation',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', matchId)
+
+  return
+}
+
+const first = latestSubmissions[0]
+const second = latestSubmissions[1]
 
   if (compareSubmissions(first, second)) {
     const homeScore = Number(first.reported_home_score)
