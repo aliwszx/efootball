@@ -33,7 +33,7 @@ export default function ProfileForm({
       <div className="flex flex-col gap-6">
 
         {/* Avatar Card */}
-        <div className="rounded-2xl border   border-white/[0.08] bg-white/[0.03] p-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6">
           <h2 className="text-lg font-semibold text-white">Profil şəkli</h2>
 
           <div className="mt-5 flex items-center gap-5">
@@ -92,7 +92,7 @@ export default function ProfileForm({
         </div>
 
         {/* Username Card */}
-        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-6">
+        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6">
           <h2 className="text-lg font-semibold text-white">Username dəyiş</h2>
           <p className="mt-1 text-sm text-zinc-500">
             Cari: <span className="font-medium text-[#00e5a0]">@{currentUsername || '—'}</span>
@@ -143,7 +143,7 @@ export default function ProfileForm({
       </div>
 
       {/* RIGHT — Payment History */}
-      <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-6">
+      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6">
         <h2 className="text-lg font-semibold text-white">Ödəniş tarixçəsi</h2>
 
         <div className="mt-5 space-y-3">
