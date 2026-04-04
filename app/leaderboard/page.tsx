@@ -3,7 +3,13 @@ import { createClient } from '@/lib/supabase/server'
 export default async function LeaderboardPage() {
   const supabase = await createClient()
 
-  const { data: entries, error } = await supabase
+  // Əvvəlcə bütün profilləri gətir
+  const { data: profiles, error: profilesError } = await supabase
+    .from('profiles')
+    .select('id, username, full_name, avatar_url')
+
+  // Leaderboard məlumatlarını gətir
+  const { data: leaderboardEntries, error: leaderboardError } = await supabase
     .from('global_leaderboard')
     .select(`
       id,
@@ -12,17 +18,39 @@ export default async function LeaderboardPage() {
       draws_total,
       playoff_qualifications_total,
       final_appearances_total,
-      global_points,
-      profiles:user_id (
-        id,
-        username,
-        full_name,
-        avatar_url
-      )
+      global_points
     `)
-    .order('global_points', { ascending: false })
-    .order('wins_total', { ascending: false })
-    .order('draws_total', { ascending: false })
+
+  const error = profilesError || leaderboardError
+
+  // Bütün profilləri leaderboard məlumatları ilə birləşdir
+  const leaderboardMap = new Map(
+    (leaderboardEntries || []).map((e: any) => [e.user_id, e])
+  )
+
+  const merged = (profiles || []).map((profile: any) => {
+    const entry = leaderboardMap.get(profile.id)
+    return {
+      id: entry?.id ?? profile.id,
+      user_id: profile.id,
+      wins_total: entry?.wins_total ?? 0,
+      draws_total: entry?.draws_total ?? 0,
+      playoff_qualifications_total: entry?.playoff_qualifications_total ?? 0,
+      final_appearances_total: entry?.final_appearances_total ?? 0,
+      global_points: entry?.global_points ?? 0,
+      profile,
+    }
+  })
+
+  // Sıralama: xal (azalan) → əlifba (artan)
+  const entries = merged
+    .sort((a, b) => {
+      if (b.global_points !== a.global_points) return b.global_points - a.global_points
+      const nameA = (a.profile?.full_name || a.profile?.username || '').toLowerCase()
+      const nameB = (b.profile?.full_name || b.profile?.username || '').toLowerCase()
+      return nameA.localeCompare(nameB, 'az')
+    })
+    .slice(0, 20)
 
   return (
     <main className="min-h-screen bg-[#050816] px-4 py-10 text-white sm:px-6 lg:px-8">
@@ -51,7 +79,7 @@ export default async function LeaderboardPage() {
             <>
               <div className="mb-6 grid gap-4 md:grid-cols-3">
                 {entries.slice(0, 3).map((item: any, index: number) => {
-                  const profile = Array.isArray(item.profiles) ? item.profiles[0] : item.profiles
+                  const profile = item.profile
                   const displayName = profile?.full_name || profile?.username || 'User'
                   const username = profile?.username || 'username'
                   const avatarUrl = profile?.avatar_url || ''
@@ -66,7 +94,7 @@ export default async function LeaderboardPage() {
 
                   return (
                     <div
-                      key={item.id}
+                      key={item.user_id}
                       className={`rounded-[28px] border p-5 backdrop-blur-xl ${placeStyles}`}
                     >
                       <div className="mb-4 flex items-center justify-between">
@@ -81,11 +109,7 @@ export default async function LeaderboardPage() {
                       <div className="flex items-center gap-4">
                         <div className="h-16 w-16 overflow-hidden rounded-full border border-white/10 bg-white/5">
                           {avatarUrl ? (
-                            <img
-                              src={avatarUrl}
-                              alt={displayName}
-                              className="h-full w-full object-cover"
-                            />
+                            <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center text-lg font-bold text-cyan-300">
                               {avatarLetter}
@@ -94,9 +118,7 @@ export default async function LeaderboardPage() {
                         </div>
 
                         <div className="min-w-0">
-                          <p className="truncate text-lg font-semibold text-white">
-                            {displayName}
-                          </p>
+                          <p className="truncate text-lg font-semibold text-white">{displayName}</p>
                           <p className="truncate text-sm text-zinc-400">@{username}</p>
                         </div>
                       </div>
@@ -106,7 +128,6 @@ export default async function LeaderboardPage() {
                           <p className="text-zinc-400">Qələbə</p>
                           <p className="mt-1 font-semibold text-white">{item.wins_total}</p>
                         </div>
-
                         <div className="rounded-2xl border border-white/10 bg-black/20 px-3 py-3">
                           <p className="text-zinc-400">Bərabərlik</p>
                           <p className="mt-1 font-semibold text-white">{item.draws_total}</p>
@@ -133,55 +154,38 @@ export default async function LeaderboardPage() {
 
                   <tbody>
                     {entries.map((item: any, index: number) => {
-                      const profile = Array.isArray(item.profiles)
-                        ? item.profiles[0]
-                        : item.profiles
-
-                      const displayName =
-                        profile?.full_name || profile?.username || 'User'
+                      const profile = item.profile
+                      const displayName = profile?.full_name || profile?.username || 'User'
                       const username = profile?.username || 'username'
                       const avatarUrl = profile?.avatar_url || ''
                       const avatarLetter = username.charAt(0).toUpperCase()
 
                       return (
-                        <tr key={item.id} className="border-t border-white/10">
+                        <tr key={item.user_id} className="border-t border-white/10">
                           <td className="p-4 font-semibold text-cyan-300">{index + 1}</td>
 
                           <td className="p-4">
                             <div className="flex items-center gap-3">
                               <div className="h-11 w-11 overflow-hidden rounded-full border border-white/10 bg-white/5">
                                 {avatarUrl ? (
-                                  <img
-                                    src={avatarUrl}
-                                    alt={displayName}
-                                    className="h-full w-full object-cover"
-                                  />
+                                  <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
                                 ) : (
                                   <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-cyan-300">
                                     {avatarLetter}
                                   </div>
                                 )}
                               </div>
-
                               <div className="min-w-0">
-                                <div className="truncate font-medium text-white">
-                                  {displayName}
-                                </div>
-                                <div className="truncate text-xs text-zinc-500">
-                                  @{username}
-                                </div>
+                                <div className="truncate font-medium text-white">{displayName}</div>
+                                <div className="truncate text-xs text-zinc-500">@{username}</div>
                               </div>
                             </div>
                           </td>
 
                           <td className="p-4 text-zinc-200">{item.wins_total}</td>
                           <td className="p-4 text-zinc-200">{item.draws_total}</td>
-                          <td className="p-4 text-zinc-200">
-                            {item.playoff_qualifications_total}
-                          </td>
-                          <td className="p-4 text-zinc-200">
-                            {item.final_appearances_total}
-                          </td>
+                          <td className="p-4 text-zinc-200">{item.playoff_qualifications_total}</td>
+                          <td className="p-4 text-zinc-200">{item.final_appearances_total}</td>
                           <td className="p-4 font-bold text-white">{item.global_points}</td>
                         </tr>
                       )
