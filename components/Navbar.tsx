@@ -103,74 +103,75 @@ export default function Navbar() {
           )}
         </nav>
 
-        {/* Desktop Right */}
-        <div className="hidden md:flex items-center gap-2">
-          {loading ? (
-            <div className="h-9 w-32 animate-pulse rounded-xl bg-white/[0.06]" />
-          ) : user ? (
-            <div className="relative" ref={profileMenuRef}>
-              <button
-                type="button"
-                onClick={() => setProfileOpen(p => !p)}
-                className="flex items-center gap-2.5 rounded-xl border border-white/[0.12] bg-white/[0.07] px-3 py-2 transition-all hover:bg-white/[0.12] hover:border-white/[0.18]"
-              >
-                <div className="h-7 w-7 overflow-hidden rounded-full border border-white/20 bg-white/10 flex-shrink-0">
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Profil" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs font-bold text-cyan-300">
-                      {avatarLetter}
-                    </div>
-                  )}
-                </div>
-                <span className="max-w-[110px] truncate text-sm font-medium text-white">{username}</span>
-                <svg className={`h-3.5 w-3.5 text-zinc-400 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
-                  viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-
-              {profileOpen && (
-                <div className="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-white/[0.1] bg-[#08090f]/95 backdrop-blur-xl shadow-2xl shadow-black/70 p-1.5">
-                  <div className="px-3 py-2.5 mb-1">
-                    <p className="truncate text-sm font-semibold text-white">{username}</p>
-                    <p className="truncate text-xs text-zinc-500 mt-0.5">{user.email}</p>
-                  </div>
-                  <div className="h-px bg-white/[0.07] mx-1 mb-1" />
-                  {[
-                    { href: '/profile', label: 'Profil', icon: '👤' },
-                    { href: '/my-matches', label: 'Mənim matçlarım', icon: '⚽' },
-                    { href: '/dashboard/my-tournaments', label: 'Turnirlərim', icon: '🏆' },
-                    ...(isAdmin ? [{ href: '/admin', label: 'Admin panel', icon: '⚙️' }] : []),
-                  ].map(({ href, label, icon }) => (
-                    <Link key={href} href={href} onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/[0.07] hover:text-white">
-                      <span>{icon}</span>{label}
-                    </Link>
-                  ))}
-                  <div className="h-px bg-white/[0.07] mx-1 my-1" />
-                  <form action="/auth/signout" method="post">
-                    <button type="submit"
-                      className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300">
-                      <span>→</span> Çıxış
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
+       {/* Desktop Right */}
+<div className="hidden md:flex items-center gap-2 min-w-[160px] justify-end">
+  {loading ? (
+    <div className="h-9 w-36 animate-pulse rounded-xl bg-white/[0.1] border border-white/[0.1]" />
+  ) : user ? (
+    <div className="relative" ref={profileMenuRef}>
+      <button
+        type="button"
+        onClick={() => setProfileOpen(p => !p)}
+        className="flex items-center gap-2.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 transition-all hover:bg-white/15 hover:border-white/30"
+      >
+        <div className="h-7 w-7 overflow-hidden rounded-full border border-white/30 bg-cyan-500/20 flex-shrink-0">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profil" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex items-center gap-2">
-              <Link href="/login"
-                className="rounded-xl border border-white/[0.12] bg-white/[0.06] px-4 py-2 text-sm font-medium text-zinc-100 transition-all hover:bg-white/[0.1] hover:text-white">
-                Daxil ol
-              </Link>
-              <Link href="/register"
-                className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-4 py-2 text-sm font-semibold text-black transition-all hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-[1.02]">
-                Qeydiyyat
-              </Link>
+            <div className="flex h-full w-full items-center justify-center text-xs font-bold text-cyan-300">
+              {avatarLetter}
             </div>
           )}
         </div>
+        <span className="max-w-[110px] truncate text-sm font-medium text-white">{username}</span>
+        <svg className={`h-3.5 w-3.5 text-zinc-300 transition-transform duration-200 ${profileOpen ? 'rotate-180' : ''}`}
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"
+          strokeLinecap="round" strokeLinejoin="round">
+          <polyline points="6 9 12 15 18 9" />
+        </svg>
+      </button>
+
+      {profileOpen && (
+        <div className="absolute right-0 mt-2 w-60 overflow-hidden rounded-2xl border border-white/[0.12] bg-[#08090f] shadow-2xl shadow-black/80 p-1.5" style={{ backdropFilter: 'blur(24px)' }}>
+          <div className="px-3 py-2.5 mb-1">
+            <p className="truncate text-sm font-semibold text-white">{username}</p>
+            <p className="truncate text-xs text-zinc-500 mt-0.5">{user.email}</p>
+          </div>
+          <div className="h-px bg-white/[0.08] mx-1 mb-1" />
+          {[
+            { href: '/profile', label: 'Profil', icon: '👤' },
+            { href: '/my-matches', label: 'Mənim matçlarım', icon: '⚽' },
+            { href: '/dashboard/my-tournaments', label: 'Turnirlərim', icon: '🏆' },
+            ...(isAdmin ? [{ href: '/admin', label: 'Admin panel', icon: '⚙️' }] : []),
+          ].map(({ href, label, icon }) => (
+            <Link key={href} href={href} onClick={() => setProfileOpen(false)}
+              className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-white">
+              <span>{icon}</span>{label}
+            </Link>
+          ))}
+          <div className="h-px bg-white/[0.08] mx-1 my-1" />
+          <form action="/auth/signout" method="post">
+            <button type="submit"
+              className="w-full flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300">
+              <span>→</span> Çıxış
+            </button>
+          </form>
+        </div>
+      )}
+    </div>
+  ) : (
+    <div className="flex items-center gap-2">
+      <Link href="/login"
+        className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-white/15">
+        Daxil ol
+      </Link>
+      <Link href="/register"
+        className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-4 py-2 text-sm font-semibold text-black transition-all hover:shadow-lg hover:shadow-cyan-500/25 hover:scale-[1.02]">
+        Qeydiyyat
+      </Link>
+    </div>
+  )}
+</div>
 
         {/* Mobile burger */}
         <button type="button" onClick={() => setMenuOpen(p => !p)}
