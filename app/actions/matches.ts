@@ -1,7 +1,8 @@
 'use server'
-import { createAdminClient } from '@/lib/supabase/admin'
+
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
+import { createAdminClient } from '@/lib/supabase/admin'
 import { createClient } from '@/lib/supabase/server'
 
 export type MatchActionState = {
@@ -45,8 +46,8 @@ async function getAdminOrThrow() {
 
 function compareSubmissions(a: any, b: any) {
   return (
-    a.reported_home_score === b.reported_home_score &&
-    a.reported_away_score === b.reported_away_score
+    Number(a.reported_home_score) === Number(b.reported_home_score) &&
+    Number(a.reported_away_score) === Number(b.reported_away_score)
   )
 }
 
@@ -93,12 +94,16 @@ async function upsertStandingsRows(
       updated_at: new Date().toISOString(),
     }
 
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('tournament_standings')
       .select('id')
       .eq('tournament_id', tournamentId)
       .eq('participant_id', row.participant_id)
       .maybeSingle()
+
+    if (existingError) {
+      throw new Error(`Standings mövcudluq yoxlaması xətası: ${existingError.message}`)
+    }
 
     if (existing) {
       const { error } = await supabase
@@ -117,6 +122,150 @@ async function upsertStandingsRows(
       }
     }
   }
+}
+
+async function recalculateGlobalLeaderboard(supabase: any) {
+  const { data: participants, error: participantsError } = await supabase
+    .from('tournament_participants')
+    .select(`
+      id,
+      user_id,
+      qualified_to,
+      final_position
+    `)
+
+  if (participantsError) {
+    throw new Error(
+      `Global leaderboard üçün participants oxunmadı: ${participantsError.message}`
+    )
+  }
+
+  const { data: completedLeagueMatches, error: leagueMatchesError } = await supabase
+    .from('league_matches')
+    .select(`
+      id,
+      home_participant_id,
+      away_participant_id,
+      home_score,
+      away_score,
+      match_status
+    `)
+    .eq('match_status', 'completed')
+
+  if (leagueMatchesError) {
+    throw new Error(`League matches oxunmadı: ${leagueMatchesError.message}`)
+  }
+
+  const participantToUser = new Map<string, string>()
+  const userStats = new Map<
+    string,
+    {
+      user_id: string
+      wins_total: number
+      draws_total: number
+      playoff_qualifications_total: number
+      final_appearances_total: number
+      global_points: number
+    }
+  >()
+
+  for (const participant of participants || []) {
+    participantToUser.set(participant.id, participant.user_id)
+
+    if (!userStats.has(participant.user_id)) {
+      userStats.set(participant.user_id, {
+        user_id: participant.user_id,
+        wins_total: 0,
+        draws_total: 0,
+        playoff_qualifications_total: 0,
+        final_appearances_total: 0,
+        global_points: 0,
+      })
+    }
+  }
+
+  for (const match of completedLeagueMatches || []) {
+    if (match.home_score === null || match.away_score === null) continue
+
+    const homeUserId = participantToUser.get(match.home_participant_id)
+    const awayUserId = participantToUser.get(match.away_participant_id)
+
+    if (!homeUserId || !awayUserId) continue
+
+    const homeStats = userStats.get(homeUserId)
+    const awayStats = userStats.get(awayUserId)
+
+    if (!homeStats || !awayStats) continue
+
+    const homeScore = Number(match.home_score)
+    const awayScore = Number(match.away_score)
+
+    if (homeScore > awayScore) {
+      homeStats.wins_total += 1
+      homeStats.global_points += 3
+    } else if (awayScore > homeScore) {
+      awayStats.wins_total += 1
+      awayStats.global_points += 3
+    } else {
+      homeStats.draws_total += 1
+      awayStats.draws_total += 1
+      homeStats.global_points += 1
+      awayStats.global_points += 1
+    }
+  }
+
+  for (const participant of participants || []) {
+    const stats = userStats.get(participant.user_id)
+    if (!stats) continue
+
+    if (participant.qualified_to === 'playoff') {
+      stats.playoff_qualifications_total += 1
+      stats.global_points += 2
+    }
+
+    if (
+      participant.qualified_to === 'final' ||
+      participant.qualified_to === 'winner' ||
+      participant.final_position === 1 ||
+      participant.final_position === 2
+    ) {
+      stats.final_appearances_total += 1
+      stats.global_points += 4
+    }
+  }
+
+  const rows = Array.from(userStats.values())
+
+  const { error: deleteError } = await supabase
+    .from('global_leaderboard')
+    .delete()
+    .neq('id', '00000000-0000-0000-0000-000000000000')
+
+  if (deleteError) {
+    throw new Error(`Global leaderboard təmizlənmədi: ${deleteError.message}`)
+  }
+
+  if (rows.length > 0) {
+    const payload = rows.map((row) => ({
+      user_id: row.user_id,
+      wins_total: row.wins_total,
+      draws_total: row.draws_total,
+      playoff_qualifications_total: row.playoff_qualifications_total,
+      final_appearances_total: row.final_appearances_total,
+      global_points: row.global_points,
+      updated_at: new Date().toISOString(),
+    }))
+
+    const { error: insertError } = await supabase
+      .from('global_leaderboard')
+      .insert(payload)
+
+    if (insertError) {
+      throw new Error(`Global leaderboard yazılmadı: ${insertError.message}`)
+    }
+  }
+
+  revalidatePath('/leaderboard')
 }
 
 export async function recalculateLeagueStandings(tournamentId: string) {
@@ -233,10 +382,12 @@ export async function recalculateLeagueStandings(tournamentId: string) {
   })
 
   await upsertStandingsRows(supabase, tournamentId, sorted)
+  await recalculateGlobalLeaderboard(supabase)
 
   revalidatePath('/my-matches')
   revalidatePath('/admin/disputes')
   revalidatePath('/admin/standings')
+  revalidatePath('/leaderboard')
 }
 
 async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string) {
@@ -287,6 +438,7 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string)
     if (error) {
       throw new Error(error.message)
     }
+
     return
   }
 
@@ -302,36 +454,41 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string)
     if (error) {
       throw new Error(error.message)
     }
+
     return
   }
 
-// hər participant üçün ən son submission-u götür
-const latestByParticipant = new Map()
+  const latestByParticipant = new Map<string, any>()
 
-for (const row of rows) {
-  latestByParticipant.set(row.submitted_by_participant_id, row)
-}
+  for (const row of rows) {
+    latestByParticipant.set(row.submitted_by_participant_id, row)
+  }
 
-const latestSubmissions = Array.from(latestByParticipant.values())
+  const latestSubmissions = Array.from(latestByParticipant.values())
 
-if (latestSubmissions.length < 2) {
-  await supabase
-    .from('league_matches')
-    .update({
-      match_status: 'awaiting_confirmation',
-      updated_at: new Date().toISOString(),
-    })
-    .eq('id', matchId)
+  if (latestSubmissions.length < 2) {
+    const { error } = await supabase
+      .from('league_matches')
+      .update({
+        match_status: 'awaiting_confirmation',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('id', matchId)
 
-  return
-}
+    if (error) {
+      throw new Error(error.message)
+    }
 
-const first = latestSubmissions[0]
-const second = latestSubmissions[1]
+    return
+  }
+
+  const first = latestSubmissions[0]
+  const second = latestSubmissions[1]
 
   if (compareSubmissions(first, second)) {
     const homeScore = Number(first.reported_home_score)
     const awayScore = Number(first.reported_away_score)
+
     const winnerParticipantId = getWinnerParticipantId(
       match.home_participant_id,
       match.away_participant_id,
@@ -381,6 +538,18 @@ const second = latestSubmissions[1]
 
   if (disputedError) {
     throw new Error(disputedError.message)
+  }
+
+  const { error: submissionRejectError } = await supabase
+    .from('league_match_submissions')
+    .update({
+      submission_status: 'rejected',
+      updated_at: new Date().toISOString(),
+    })
+    .eq('match_id', matchId)
+
+  if (submissionRejectError) {
+    throw new Error(submissionRejectError.message)
   }
 }
 
@@ -482,12 +651,16 @@ export async function submitLeagueMatchResult(
     return { error: `Screenshot upload olmadı: ${uploadError.message}` }
   }
 
-  const { data: existingSubmission } = await supabase
+  const { data: existingSubmission, error: existingSubmissionError } = await supabase
     .from('league_match_submissions')
     .select('id')
     .eq('match_id', match.id)
     .eq('submitted_by_participant_id', myParticipant.id)
     .maybeSingle()
+
+  if (existingSubmissionError) {
+    return { error: `Submission yoxlanmadı: ${existingSubmissionError.message}` }
+  }
 
   if (existingSubmission) {
     const { error: updateError } = await supabase
@@ -523,17 +696,18 @@ export async function submitLeagueMatchResult(
     }
   }
 
- try {
-  const adminSupabase = createAdminClient()
-  await resolveLeagueMatchFromSubmissions(adminSupabase, match.id)
-} catch (error: any) {
-  return { error: error.message || 'Match nəticəsi işlənmədi.' }
-}
+  try {
+    const adminSupabase = createAdminClient()
+    await resolveLeagueMatchFromSubmissions(adminSupabase, match.id)
+  } catch (error: any) {
+    return { error: error.message || 'Match nəticəsi işlənmədi.' }
+  }
 
   revalidatePath('/my-matches')
   revalidatePath(`/matches/${match.id}`)
   revalidatePath('/admin/disputes')
   revalidatePath('/tournaments')
+  revalidatePath('/leaderboard')
 
   return { success: 'Nəticə göndərildi.' }
 }
@@ -635,6 +809,7 @@ export async function adminResolveLeagueDispute(
   revalidatePath(`/matches/${match.id}`)
   revalidatePath('/my-matches')
   revalidatePath('/tournaments')
+  revalidatePath('/leaderboard')
 
   return { success: 'Mübahisə həll olundu.' }
 }
