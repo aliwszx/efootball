@@ -42,8 +42,8 @@ export async function updateProfileAvatar(
   }
 
   const extension = avatar.name.includes('.') ? avatar.name.split('.').pop() : 'png'
-  const fileName = `${user.id}-${Date.now()}-${sanitizeFilename(avatar.name || `avatar.${extension}`)}`
-  const filePath = `profiles/${fileName}`
+  const safeName = sanitizeFilename(avatar.name || `avatar.${extension}`)
+  const filePath = `profiles/${user.id}/${Date.now()}-${safeName}`
 
   const { error: uploadError } = await supabase.storage
     .from('avatars')
@@ -74,8 +74,6 @@ export async function updateProfileAvatar(
   }
 
   revalidatePath('/profile')
-  revalidatePath('/settings')
-  revalidatePath('/')
 
   return { success: 'Profil şəkli yeniləndi.' }
 }
