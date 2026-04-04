@@ -5,6 +5,9 @@ import { updateUsername, type UpdateUsernameState } from './actions'
 
 type ProfileFormProps = {
   currentUsername: string
+  fullName: string
+  avatarUrl: string
+  role: string
   email: string
   payments: any[]
 }
