@@ -5,7 +5,6 @@ import ProfileForm from './form'
 
 export default async function ProfilePage() {
   const supabase = await createClient()
-
   const {
     data: { user },
   } = await supabase.auth.getUser()
@@ -32,40 +31,34 @@ export default async function ProfilePage() {
 
   return (
     <main className="min-h-screen bg-[#050816] px-4 py-10 text-white sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-6xl">
-        <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl sm:p-8">
-          <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">
-            Profile
-          </p>
+      <div className="mx-auto max-w-6xl space-y-8">
 
+        {/* Header */}
+        <section className="rounded-2xl border border-white/10 bg-[#0d1424] p-6 sm:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold sm:text-5xl">Profilim</h1>
-              <p className="mt-3 text-sm text-zinc-300">
+              <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#00e5a0]">
+                Hesab
+              </p>
+              <h1 className="text-3xl font-bold sm:text-4xl">Profilim</h1>
+              <p className="mt-2 text-sm text-zinc-400">
                 Hesab məlumatlarını idarə et, profil şəklini yenilə və ödənişlərini yoxla.
               </p>
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="h-20 w-20 overflow-hidden rounded-full border border-white/10 bg-white/5">
+              <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[#00e5a0]/30 bg-[#0b1120]">
                 {avatarUrl ? (
-                  <img
-                    src={avatarUrl}
-                    alt="Profil şəkli"
-                    className="h-full w-full object-cover"
-                  />
+                  <img src={avatarUrl} alt="Profil" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xl font-semibold text-cyan-300">
-                    {username?.charAt(0)?.toUpperCase() || 'U'}
+                  <div className="flex h-full w-full items-center justify-center text-xl font-bold text-[#00e5a0]">
+                    {(username || user.email || 'U').charAt(0).toUpperCase()}
                   </div>
                 )}
               </div>
-
               <div>
-                <p className="text-lg font-semibold">
-                  {fullName || username || 'İstifadəçi'}
-                </p>
-                <p className="text-sm text-zinc-400">{user.email ?? ''}</p>
+                <p className="font-semibold">{fullName || username || 'İstifadəçi'}</p>
+                <p className="text-sm text-zinc-400">@{username || 'username'}</p>
               </div>
             </div>
           </div>
@@ -73,29 +66,27 @@ export default async function ProfilePage() {
           <div className="mt-6 flex flex-wrap gap-3">
             <Link
               href="/tournaments"
-              className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium transition hover:bg-white/10"
+              className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium transition hover:bg-white/10"
             >
               Turnirlərə keç
             </Link>
-
             <Link
               href="/dashboard/my-tournaments"
-              className="rounded-2xl border border-white/10 bg-white/5 px-5 py-3 text-sm font-medium transition hover:bg-white/10"
+              className="rounded-xl border border-white/10 bg-white/5 px-5 py-2.5 text-sm font-medium transition hover:bg-white/10"
             >
               Mənim turnirlərim
             </Link>
           </div>
         </section>
 
-        <div className="mt-8">
-          <ProfileForm
-            currentUsername={username}
-            fullName={fullName}
-            avatarUrl={avatarUrl}
-            email={user.email ?? ''}
-            payments={payments || []}
-          />
-        </div>
+        {/* Form */}
+        <ProfileForm
+          currentUsername={username}
+          fullName={fullName}
+          avatarUrl={avatarUrl}
+          email={user.email ?? ''}
+          payments={payments || []}
+        />
       </div>
     </main>
   )
