@@ -120,7 +120,7 @@ async function upsertStandingsRows(
 }
 
 export async function recalculateLeagueStandings(tournamentId: string) {
-  const { supabase } = await getAuthUser()
+  const supabase = createAdminClient()
 
   const { data: participants, error: participantError } = await supabase
     .from('tournament_participants')
