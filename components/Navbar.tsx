@@ -24,48 +24,46 @@ export default function Navbar() {
   const profileMenuRef = useRef<HTMLDivElement | null>(null)
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 12)
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
+  const supabase = createClient()
 
-  useEffect(() => {
-    const supabase = createClient()
-
-    const loadUser = async (initial = false) => {
-  if (initial) setLoading(true)
-
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) {
-        setUser(null)
-        setProfile(null)
-        setLoading(false)
-        return
-      }
-
-      setUser({ id: user.id, email: user.email })
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('username, avatar_url, role')
-        .eq('id', user.id)
-        .maybeSingle()
-
-      setProfile(profile || null)
-      setLoading(false)
-    }
-
-    loadUser()
+  const loadUser = async (initial = false) => {
+    if (initial) setLoading(true)
 
     const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange(() => loadUser())
+      data: { user },
+    } = await supabase.auth.getUser()
 
-    return () => subscription.unsubscribe()
-  }, [])
+    if (!user) {
+      setUser(null)
+      setProfile(null)
+      setLoading(false)
+      return
+    }
+
+    setUser({ id: user.id, email: user.email })
+
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('username, avatar_url, role')
+      .eq('id', user.id)
+      .maybeSingle()
+
+    setProfile(profile || null)
+    setLoading(false)
+  }
+
+  loadUser(true) // ✅ yalnız ilk dəfə loading
+
+  const {
+    data: { subscription },
+  } = supabase.auth.onAuthStateChange(() => {
+    loadUser(false) // ❌ loading artıq dəyişmir
+  })
+
+  return () => subscription.unsubscribe()
+}, [])
+
+  
 
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
