@@ -84,6 +84,12 @@ export default function Navbar() {
           >
             Turnirlər
           </Link>
+          <Link
+  href="/my-matches"
+  className="text-sm text-zinc-200 transition hover:text-cyan-300"
+>
+  My Matches
+</Link>
 
           <Link
             href="/leaderboard"
@@ -195,6 +201,13 @@ export default function Navbar() {
             >
               Turnirlər
             </Link>
+            <Link
+  href="/my-matches"
+  onClick={() => setMenuOpen(false)}
+  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-200"
+>
+  My Matches
+</Link>
 
             <Link
               href="/leaderboard"
