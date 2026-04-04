@@ -33,7 +33,7 @@ export default function ProfileForm({
       <div className="flex flex-col gap-6">
 
         {/* Avatar Card */}
-        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-6">
+        <div className="rounded-2xl border   border-white/[0.08] bg-white/[0.03] p-6">
           <h2 className="text-lg font-semibold text-white">Profil şəkli</h2>
 
           <div className="mt-5 flex items-center gap-5">
