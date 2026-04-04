@@ -1,7 +1,7 @@
 'use client'
 
 import { useActionState } from 'react'
-import { updateProfileAvatar, updateUsername, type ProfileActionState } from '@/app/actions/profile'
+import { updateProfileAvatar, updateUsername, updateFullName, type ProfileActionState } from '@/app/actions/profile'
 
 type ProfileFormProps = {
   currentUsername: string
@@ -22,6 +22,7 @@ export default function ProfileForm({
 }: ProfileFormProps) {
   const [avatarState, avatarFormAction, avatarPending] = useActionState(updateProfileAvatar, initialState)
   const [usernameState, usernameFormAction, usernamePending] = useActionState(updateUsername, initialState)
+  const [fullNameState, fullNameFormAction, fullNamePending] = useActionState(updateFullName, initialState)
 
   const displayName = fullName || currentUsername || 'İstifadəçi'
   const avatarLetter = (currentUsername || email || 'U').charAt(0).toUpperCase()
@@ -33,7 +34,7 @@ export default function ProfileForm({
       <div className="flex flex-col gap-6">
 
         {/* Avatar Card */}
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6">
+        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-6">
           <h2 className="text-lg font-semibold text-white">Profil şəkli</h2>
 
           <div className="mt-5 flex items-center gap-5">
@@ -92,7 +93,7 @@ export default function ProfileForm({
         </div>
 
         {/* Username Card */}
-        <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6">
+        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-6">
           <h2 className="text-lg font-semibold text-white">Username dəyiş</h2>
           <p className="mt-1 text-sm text-zinc-500">
             Cari: <span className="font-medium text-[#00e5a0]">@{currentUsername || '—'}</span>
@@ -140,10 +141,56 @@ export default function ProfileForm({
             </button>
           </form>
         </div>
+
+        {/* Full Name Card */}
+        <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-6">
+          <h2 className="text-lg font-semibold text-white">Ad dəyiş</h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            Cari: <span className="font-medium text-zinc-300">{fullName || '—'}</span>
+          </p>
+
+          <form action={fullNameFormAction} className="mt-5 space-y-4">
+            <div>
+              <label className="mb-2 block text-sm text-zinc-400">
+                Yeni ad
+              </label>
+              <input
+                type="text"
+                name="full_name"
+                defaultValue={fullName}
+                placeholder="Adınız Soyadınız"
+                autoComplete="off"
+                className="w-full rounded-xl border border-white/10 bg-[#080e1a] px-4 py-3 text-sm text-white
+                  placeholder-zinc-600 outline-none focus:border-[#00e5a0]/40 transition"
+              />
+              <p className="mt-1.5 text-xs text-zinc-600">Maksimum 50 simvol.</p>
+            </div>
+
+            {fullNameState.error && (
+              <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-300">
+                {fullNameState.error}
+              </div>
+            )}
+            {fullNameState.success && (
+              <div className="rounded-xl border border-[#00e5a0]/20 bg-[#00e5a0]/10 px-4 py-3 text-sm text-[#00e5a0]">
+                {fullNameState.success}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={fullNamePending}
+              className="w-full rounded-xl bg-[#00e5a0] px-5 py-3 text-sm font-bold text-black transition
+                hover:bg-[#00cc8e] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {fullNamePending ? 'Saxlanılır...' : 'Adı yenilə'}
+            </button>
+          </form>
+        </div>
       </div>
 
       {/* RIGHT — Payment History */}
-      <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6">
+      <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-6">
         <h2 className="text-lg font-semibold text-white">Ödəniş tarixçəsi</h2>
 
         <div className="mt-5 space-y-3">
