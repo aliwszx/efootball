@@ -16,7 +16,7 @@ export default async function ProfilePage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('username, full_name, avatar_url, role')
+    .select('username, full_name, avatar_url')
     .eq('id', user.id)
     .maybeSingle()
 
@@ -29,7 +29,6 @@ export default async function ProfilePage() {
   const username = profile?.username || ''
   const fullName = profile?.full_name || ''
   const avatarUrl = profile?.avatar_url || ''
-  const role = profile?.role || 'user'
 
   return (
     <main className="min-h-screen bg-[#050816] px-4 py-10 text-white sm:px-6 lg:px-8">
@@ -63,11 +62,10 @@ export default async function ProfilePage() {
               </div>
 
               <div>
-                <p className="text-lg font-semibold">{fullName || username || 'İstifadəçi'}</p>
-                <p className="text-sm text-zinc-400">{user.email ?? ''}</p>
-                <p className="mt-1 inline-flex rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-medium text-cyan-300">
-                  {role}
+                <p className="text-lg font-semibold">
+                  {fullName || username || 'İstifadəçi'}
                 </p>
+                <p className="text-sm text-zinc-400">{user.email ?? ''}</p>
               </div>
             </div>
           </div>
@@ -94,7 +92,6 @@ export default async function ProfilePage() {
             currentUsername={username}
             fullName={fullName}
             avatarUrl={avatarUrl}
-            role={role}
             email={user.email ?? ''}
             payments={payments || []}
           />
