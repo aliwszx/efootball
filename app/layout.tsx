@@ -1,11 +1,18 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/Navbar'
-import { DM_Sans } from 'next/font/google'
+import { Syne, DM_Sans } from 'next/font/google'
+
+const syne = Syne({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700', '800'],
+  variable: '--font-syne',
+})
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-dm-sans',
 })
 
 export const metadata: Metadata = {
@@ -15,21 +22,28 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="az">
-      <body className={`${dmSans.className} min-h-screen bg-[#06070a] text-white antialiased`}>
+      <body className={`${syne.variable} ${dmSans.variable} min-h-screen bg-[#04050a] text-white antialiased font-sans`}>
         <div className="relative min-h-screen overflow-x-hidden">
-          <div className="pointer-events-none absolute inset-0 -z-10">
-            <div className="absolute left-1/2 top-0 h-[420px] w-[420px] -translate-x-1/2 rounded-full bg-cyan-500/10 blur-3xl" />
-            <div className="absolute right-0 top-40 h-[320px] w-[320px] rounded-full bg-blue-500/10 blur-3xl" />
-            <div className="absolute bottom-0 left-0 h-[280px] w-[280px] rounded-full bg-emerald-500/10 blur-3xl" />
+
+          {/* Arxa fon qradientləri */}
+          <div className="pointer-events-none fixed inset-0 -z-10">
+            <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/6 blur-[120px]" />
+            <div className="absolute right-[-10%] top-[30%] h-[400px] w-[400px] rounded-full bg-blue-600/5 blur-[100px]" />
+            <div className="absolute bottom-0 left-[-5%] h-[350px] w-[350px] rounded-full bg-cyan-400/4 blur-[100px]" />
+            {/* Noise texture */}
+            <svg className="absolute inset-0 h-full w-full opacity-[0.025]" xmlns="http://www.w3.org/2000/svg">
+              <filter id="noise">
+                <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4" stitchTiles="stitch" />
+              </filter>
+              <rect width="100%" height="100%" filter="url(#noise)" />
+            </svg>
           </div>
 
           <Navbar />
-          <main>{children}</main>
+          <main className="relative z-10">{children}</main>
         </div>
       </body>
     </html>
