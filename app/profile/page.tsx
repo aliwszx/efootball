@@ -30,7 +30,7 @@ export default async function ProfilePage() {
   const avatarUrl = profile?.avatar_url || ''
 
   return (
-    <main className="min-h-screen bg-[#050816] px-4 py-10 text-white sm:px-6 lg:px-8">
+    <main className="min-h-screen px-4 py-10 text-white sm:px-6 lg:px-8">
       <div className="mx-auto max-w-6xl space-y-8">
 
         {/* Header */}
