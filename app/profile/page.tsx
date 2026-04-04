@@ -34,7 +34,7 @@ export default async function ProfilePage() {
       <div className="mx-auto max-w-6xl space-y-8">
 
         {/* Header */}
-        <section className="rounded-2xl border border-white/10 bg-[#0d1424] p-6 sm:p-8">
+        <section className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 sm:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#00e5a0]">
