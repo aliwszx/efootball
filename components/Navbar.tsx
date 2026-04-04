@@ -144,106 +144,69 @@ export default function Navbar() {
           )}
         </nav>
 
-        <div className="hidden shrink-0 items-center gap-2 md:flex">
-          {loading ? (
-            <div className="h-9 w-36 animate-pulse rounded-xl border border-white/[0.1] bg-white/[0.1]" />
-          ) : user ? (
-            <div className="relative z-[60]" ref={profileMenuRef}>
-              <button
-                type="button"
-                onClick={() => setProfileOpen((p) => !p)}
-                className="flex items-center gap-2.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 transition-all hover:border-white/30 hover:bg-white/15"
-              >
-                <div className="h-7 w-7 flex-shrink-0 overflow-hidden rounded-full border border-white/30 bg-cyan-500/20">
-                  {avatarUrl ? (
-                    <img src={avatarUrl} alt="Profil" className="h-full w-full object-cover" />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs font-bold text-cyan-300">
-                      {avatarLetter}
-                    </div>
-                  )}
-                </div>
-
-                <span className="max-w-[110px] truncate text-sm font-medium text-white">
-                  {username}
-                </span>
-
-                <svg
-                  className={`h-3.5 w-3.5 text-zinc-300 transition-transform duration-200 ${
-                    profileOpen ? 'rotate-180' : ''
-                  }`}
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="6 9 12 15 18 9" />
-                </svg>
-              </button>
-
-              {profileOpen && (
-                <div
-                  className="absolute right-0 top-full z-[70] mt-2 w-60 overflow-hidden rounded-2xl border border-white/[0.12] bg-[#08090f] p-1.5 shadow-2xl shadow-black/80"
-                  style={{ backdropFilter: 'blur(24px)' }}
-                >
-                  <div className="mb-1 px-3 py-2.5">
-                    <p className="truncate text-sm font-semibold text-white">{username}</p>
-                    <p className="mt-0.5 truncate text-xs text-zinc-500">{user.email}</p>
-                  </div>
-
-                  <div className="mx-1 mb-1 h-px bg-white/[0.08]" />
-
-                  {[
-                    { href: '/profile', label: 'Profil', icon: '👤' },
-                    { href: '/my-matches', label: 'Mənim matçlarım', icon: '⚽' },
-                    { href: '/dashboard/my-tournaments', label: 'Turnirlərim', icon: '🏆' },
-                    ...(isAdmin ? [{ href: '/admin', label: 'Admin panel', icon: '⚙️' }] : []),
-                  ].map(({ href, label, icon }) => (
-                    <Link
-                      key={href}
-                      href={href}
-                      onClick={() => setProfileOpen(false)}
-                      className="flex items-center gap-2.5 rounded-xl px-3 py-2.5 text-sm text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-white"
-                    >
-                      <span>{icon}</span>
-                      {label}
-                    </Link>
-                  ))}
-
-                  <div className="mx-1 my-1 h-px bg-white/[0.08]" />
-
-                  <form action="/auth/signout" method="post">
-                    <button
-                      type="submit"
-                      className="flex w-full items-center gap-2.5 rounded-xl px-3 py-2.5 text-left text-sm font-medium text-red-400 transition-colors hover:bg-red-500/10 hover:text-red-300"
-                    >
-                      <span>→</span>
-                      Çıxış
-                    </button>
-                  </form>
-                </div>
-              )}
-            </div>
+        {/* Desktop Right */}
+<div className="hidden shrink-0 items-center gap-2 md:flex">
+  {loading ? (
+    <div className="h-9 w-36 animate-pulse rounded-xl border border-white/[0.1] bg-white/[0.1]" />
+  ) : user ? (
+    <div className="flex items-center gap-2">
+      {/* Profil düyməsi */}
+      <Link
+        href="/profile"
+        className="flex items-center gap-2.5 rounded-xl border border-white/20 bg-white/10 px-3 py-2 transition-all hover:border-white/30 hover:bg-white/15"
+      >
+        <div className="h-7 w-7 flex-shrink-0 overflow-hidden rounded-full border border-white/30 bg-cyan-500/20">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt="Profil" className="h-full w-full object-cover" />
           ) : (
-            <div className="flex shrink-0 items-center gap-2">
-              <Link
-                href="/login"
-                className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-white/15"
-              >
-                Daxil ol
-              </Link>
-
-              <Link
-                href="/register"
-                className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-4 py-2 text-sm font-semibold text-black transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-cyan-500/25"
-              >
-                Qeydiyyat
-              </Link>
+            <div className="flex h-full w-full items-center justify-center text-xs font-bold text-cyan-300">
+              {avatarLetter}
             </div>
           )}
         </div>
+        <span className="max-w-[110px] truncate text-sm font-medium text-white">
+          {username}
+        </span>
+        {isAdmin && (
+          <span className="rounded-md bg-cyan-500/20 px-1.5 py-0.5 text-[10px] font-semibold text-cyan-300">
+            Admin
+          </span>
+        )}
+      </Link>
+
+      {/* Logout düyməsi */}
+      <form action="/auth/signout" method="post">
+        <button
+          type="submit"
+          title="Çıxış"
+          className="flex h-9 w-9 items-center justify-center rounded-xl border border-red-500/25 bg-red-500/10 text-red-400 transition-all hover:border-red-500/40 hover:bg-red-500/20 hover:text-red-300"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 24 24"
+            fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+          </svg>
+        </button>
+      </form>
+    </div>
+  ) : (
+    <div className="flex shrink-0 items-center gap-2">
+      <Link
+        href="/login"
+        className="rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition-all hover:bg-white/15"
+      >
+        Daxil ol
+      </Link>
+      <Link
+        href="/register"
+        className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-4 py-2 text-sm font-semibold text-black transition-all hover:scale-[1.02] hover:shadow-lg hover:shadow-cyan-500/25"
+      >
+        Qeydiyyat
+      </Link>
+    </div>
+  )}
+</div>
 
         <button
           type="button"
