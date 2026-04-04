@@ -523,11 +523,12 @@ export async function submitLeagueMatchResult(
     }
   }
 
-  try {
-    await resolveLeagueMatchFromSubmissions(supabase, match.id)
-  } catch (error: any) {
-    return { error: error.message || 'Match nəticəsi işlənmədi.' }
-  }
+ try {
+  const adminSupabase = createAdminClient()
+  await resolveLeagueMatchFromSubmissions(adminSupabase, match.id)
+} catch (error: any) {
+  return { error: error.message || 'Match nəticəsi işlənmədi.' }
+}
 
   revalidatePath('/my-matches')
   revalidatePath(`/matches/${match.id}`)
