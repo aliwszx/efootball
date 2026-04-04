@@ -11,6 +11,7 @@ type AuthUser = {
 
 type ProfileData = {
   username?: string
+  role?: string
   avatar_url?: string | null
 }
 
