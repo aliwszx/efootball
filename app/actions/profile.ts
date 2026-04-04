@@ -128,3 +128,73 @@ export async function updateUsername(
   revalidatePath('/admin')
   return { success: 'Username uğurla yeniləndi.' }
 }
+
+export async function updateFullName(
+  _prevState: ProfileActionState,
+  formData: FormData
+): Promise<ProfileActionState> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Davam etmək üçün əvvəlcə daxil ol.' }
+  }
+
+  const fullName = String(formData.get('full_name') || '').trim()
+
+  if (fullName.length < 2) {
+    return { error: 'Ad ən azı 2 simvol olmalıdır.' }
+  }
+  if (fullName.length > 50) {
+    return { error: 'Ad maksimum 50 simvol ola bilər.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ full_name: fullName })
+    .eq('id', user.id)
+
+  if (error) {
+    return { error: 'Ad dəyişdirilərkən xəta baş verdi.' }
+  }
+
+  revalidatePath('/profile')
+  return { success: 'Ad uğurla yeniləndi.' }
+}
+
+export async function updateFullName(
+  _prevState: ProfileActionState,
+  formData: FormData
+): Promise<ProfileActionState> {
+  const supabase = await createClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+
+  if (!user) {
+    return { error: 'Davam etmək üçün əvvəlcə daxil ol.' }
+  }
+
+  const fullName = String(formData.get('full_name') || '').trim()
+
+  if (fullName.length < 2) {
+    return { error: 'Ad ən azı 2 simvol olmalıdır.' }
+  }
+  if (fullName.length > 50) {
+    return { error: 'Ad maksimum 50 simvol ola bilər.' }
+  }
+
+  const { error } = await supabase
+    .from('profiles')
+    .update({ full_name: fullName })
+    .eq('id', user.id)
+
+  if (error) {
+    return { error: 'Ad dəyişdirilərkən xəta baş verdi.' }
+  }
+
+  revalidatePath('/profile')
+  return { success: 'Ad uğurla yeniləndi.' }
+}
