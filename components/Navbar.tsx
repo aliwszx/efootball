@@ -5,23 +5,28 @@ import { useEffect, useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 
 type AuthUser = {
+  id: string
   email?: string
 }
 
 type ProfileData = {
   username?: string
   role?: string
+  avatar_url?: string | null
 }
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [user, setUser] = useState<AuthUser | null>(null)
   const [profile, setProfile] = useState<ProfileData | null>(null)
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const supabase = createClient()
 
     const loadUser = async () => {
+      setLoading(true)
+
       const {
         data: { user },
       } = await supabase.auth.getUser()
@@ -29,18 +34,23 @@ export default function Navbar() {
       if (!user) {
         setUser(null)
         setProfile(null)
+        setLoading(false)
         return
       }
 
-      setUser({ email: user.email })
+      setUser({
+        id: user.id,
+        email: user.email,
+      })
 
       const { data: profile } = await supabase
         .from('profiles')
-        .select('username, role')
+        .select('username, role, avatar_url')
         .eq('id', user.id)
         .maybeSingle()
 
       setProfile(profile || null)
+      setLoading(false)
     }
 
     loadUser()
@@ -56,8 +66,10 @@ export default function Navbar() {
     }
   }, [])
 
-  const username = profile?.username || user?.email || ''
+  const username = profile?.username || user?.email || 'İstifadəçi'
   const isAdmin = profile?.role === 'admin'
+  const avatarUrl = profile?.avatar_url || ''
+  const avatarLetter = username?.charAt(0)?.toUpperCase() || 'U'
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/10 bg-[#050816]/80 backdrop-blur-xl">
@@ -84,18 +96,19 @@ export default function Navbar() {
           >
             Turnirlər
           </Link>
+
           <Link
-  href="/my-matches"
-  className="text-sm text-zinc-200 transition hover:text-cyan-300"
->
-  My Matches
-</Link>
+            href="/my-matches"
+            className="text-sm text-zinc-200 transition hover:text-cyan-300"
+          >
+            Mənim matçlarım
+          </Link>
 
           <Link
             href="/leaderboard"
             className="text-sm text-zinc-200 transition hover:text-cyan-300"
           >
-            Leaderboard
+            Reytinq
           </Link>
 
           {user && (
@@ -103,7 +116,7 @@ export default function Navbar() {
               href="/profile"
               className="text-sm text-zinc-200 transition hover:text-cyan-300"
             >
-              Profile
+              Profil
             </Link>
           )}
 
@@ -118,18 +131,40 @@ export default function Navbar() {
         </nav>
 
         <div className="hidden items-center gap-3 md:flex">
-          {user ? (
+          {loading ? (
+            <div className="h-11 w-28 animate-pulse rounded-2xl border border-white/10 bg-white/5" />
+          ) : user ? (
             <>
-              <span className="rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm text-zinc-300">
-                {username}
-              </span>
+              <Link
+                href="/profile"
+                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 transition hover:bg-white/10"
+              >
+                <div className="h-10 w-10 overflow-hidden rounded-full border border-white/10 bg-white/10">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt="Profil şəkli"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-cyan-300">
+                      {avatarLetter}
+                    </div>
+                  )}
+                </div>
+
+                <div className="max-w-[140px]">
+                  <p className="truncate text-sm font-medium text-white">{username}</p>
+                  <p className="text-xs text-zinc-400">{isAdmin ? 'Admin' : 'İstifadəçi'}</p>
+                </div>
+              </Link>
 
               <form action="/auth/signout" method="post">
                 <button
                   type="submit"
                   className="rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-2.5 text-sm font-medium text-red-200 transition hover:bg-red-500/20"
                 >
-                  Logout
+                  Çıxış
                 </button>
               </form>
             </>
@@ -186,6 +221,33 @@ export default function Navbar() {
       {menuOpen && (
         <div className="border-t border-white/10 bg-[#050816]/95 px-4 py-4 md:hidden">
           <div className="mx-auto flex max-w-6xl flex-col gap-3">
+            {user && !loading && (
+              <Link
+                href="/profile"
+                onClick={() => setMenuOpen(false)}
+                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3"
+              >
+                <div className="h-12 w-12 overflow-hidden rounded-full border border-white/10 bg-white/10">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt="Profil şəkli"
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-cyan-300">
+                      {avatarLetter}
+                    </div>
+                  )}
+                </div>
+
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-white">{username}</p>
+                  <p className="text-xs text-zinc-400">{isAdmin ? 'Admin' : 'İstifadəçi'}</p>
+                </div>
+              </Link>
+            )}
+
             <Link
               href="/"
               onClick={() => setMenuOpen(false)}
@@ -201,20 +263,21 @@ export default function Navbar() {
             >
               Turnirlər
             </Link>
+
             <Link
-  href="/my-matches"
-  onClick={() => setMenuOpen(false)}
-  className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-200"
->
-  My Matches
-</Link>
+              href="/my-matches"
+              onClick={() => setMenuOpen(false)}
+              className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-200"
+            >
+              Mənim matçlarım
+            </Link>
 
             <Link
               href="/leaderboard"
               onClick={() => setMenuOpen(false)}
               className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-200"
             >
-              Leaderboard
+              Reytinq
             </Link>
 
             {user && (
@@ -223,7 +286,7 @@ export default function Navbar() {
                 onClick={() => setMenuOpen(false)}
                 className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-200"
               >
-                Profile
+                Profil
               </Link>
             )}
 
@@ -237,21 +300,17 @@ export default function Navbar() {
               </Link>
             )}
 
-            {user ? (
-              <>
-                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-zinc-300">
-                  {username}
-                </div>
-
-                <form action="/auth/signout" method="post">
-                  <button
-                    type="submit"
-                    className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-200"
-                  >
-                    Logout
-                  </button>
-                </form>
-              </>
+            {loading ? (
+              <div className="h-12 animate-pulse rounded-xl border border-white/10 bg-white/5" />
+            ) : user ? (
+              <form action="/auth/signout" method="post">
+                <button
+                  type="submit"
+                  className="w-full rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-200"
+                >
+                  Çıxış
+                </button>
+              </form>
             ) : (
               <>
                 <Link
