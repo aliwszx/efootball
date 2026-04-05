@@ -390,9 +390,9 @@ export async function recalculateLeagueStandings(tournamentId: string) {
   revalidatePath('/leaderboard')
 }
 
-async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string) {
+async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string, matchTable: string = 'league_matches') {
   const { data: match, error: matchError } = await supabase
-    .from('league_matches')
+    .from(matchTable)
     .select(`
       id,
       tournament_id,
@@ -428,7 +428,7 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string)
 
   if (rows.length === 0) {
     const { error } = await supabase
-      .from('league_matches')
+      .from(matchTable)
       .update({
         match_status: 'scheduled',
         updated_at: new Date().toISOString(),
@@ -444,7 +444,7 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string)
 
   if (rows.length === 1) {
     const { error } = await supabase
-      .from('league_matches')
+      .from(matchTable)
       .update({
         match_status: 'awaiting_confirmation',
         updated_at: new Date().toISOString(),
@@ -468,7 +468,7 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string)
 
   if (latestSubmissions.length < 2) {
     const { error } = await supabase
-      .from('league_matches')
+      .from(matchTable)
       .update({
         match_status: 'awaiting_confirmation',
         updated_at: new Date().toISOString(),
@@ -497,7 +497,7 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string)
     )
 
     const { error: matchUpdateError } = await supabase
-      .from('league_matches')
+      .from(matchTable)
       .update({
         home_score: homeScore,
         away_score: awayScore,
@@ -529,7 +529,7 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string)
   }
 
   const { error: disputedError } = await supabase
-    .from('league_matches')
+    .from(matchTable)
     .update({
       match_status: 'disputed',
       updated_at: new Date().toISOString(),
@@ -593,7 +593,7 @@ export async function submitLeagueMatchResult(
     return { error: 'Screenshot mütləqdir.' }
   }
 
-  const { data: match, error: matchError } = await supabase
+  const { data: leagueMatch } = await supabase
     .from('league_matches')
     .select(`
       id,
@@ -605,7 +605,24 @@ export async function submitLeagueMatchResult(
     .eq('id', matchId)
     .maybeSingle()
 
-  if (matchError || !match) {
+  const { data: knockoutMatch } = !leagueMatch
+    ? await supabase
+        .from('knockout_matches')
+        .select(`
+          id,
+          tournament_id,
+          home_participant_id,
+          away_participant_id,
+          match_status
+        `)
+        .eq('id', matchId)
+        .maybeSingle()
+    : { data: null }
+
+  const match = leagueMatch ?? knockoutMatch
+  const matchTable = leagueMatch ? 'league_matches' : 'knockout_matches'
+
+  if (!match) {
     return { error: 'Matç tapılmadı.' }
   }
 
@@ -698,7 +715,7 @@ export async function submitLeagueMatchResult(
 
   try {
     const adminSupabase = createAdminClient()
-    await resolveLeagueMatchFromSubmissions(adminSupabase, match.id)
+    await resolveLeagueMatchFromSubmissions(adminSupabase, match.id, matchTable)
   } catch (error: any) {
     return { error: error.message || 'Match nəticəsi işlənmədi.' }
   }
