@@ -287,7 +287,12 @@ export async function setFeaturedTournament(formData: FormData) {
   revalidatePath('/admin/tournaments')
 }
 
-export async function startTournament(formData: FormData): Promise<{ error?: string; success?: string }> {
+export type StartTournamentState = { error?: string; success?: string }
+
+export async function startTournament(
+  _prevState: StartTournamentState,
+  formData: FormData
+): Promise<StartTournamentState> {
   const supabase = await createClient()
 
   const { data: { user } } = await supabase.auth.getUser()
