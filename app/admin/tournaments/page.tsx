@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { setFeaturedTournament } from '@/app/actions/tournaments'
+import { setFeaturedTournament, startTournament } from '@/app/actions/tournaments'
 
 export default async function AdminTournamentsPage() {
   const supabase = await createClient()
@@ -75,10 +75,23 @@ export default async function AdminTournamentsPage() {
                   className="rounded-xl border border-[#C50337]/15 bg-[#C50337]/8 px-4 py-2 text-sm text-zinc-300 transition hover:border-[#C50337]/25 hover:text-white">
                   Bax
                 </Link>
-                <Link href={`/admin/tournaments/${t.id}/edit`}
-                  className="rounded-xl border border-zinc-600/30 bg-zinc-600/10 px-4 py-2 text-sm text-zinc-300 transition hover:border-zinc-500/40 hover:bg-zinc-600/20 hover:text-white">
-                  Düzəliş et
-                </Link>
+                {(t.status === 'open' || t.status === 'draft') && (
+                  <form action={startTournament}>
+                    <input type="hidden" name="tournament_id" value={t.id} />
+                    <button
+                      className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400 transition hover:border-emerald-500/40 hover:bg-emerald-500/15 hover:text-emerald-300"
+                    >
+                      ▶ Başlat
+                    </button>
+                  </form>
+                )}
+
+                {t.status === 'ongoing' && (
+                  <span className="rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-4 py-2 text-sm font-medium text-emerald-500 cursor-default">
+                    ● Davam edir
+                  </span>
+                )}
+
                 <form action={setFeaturedTournament}>
                   <input type="hidden" name="tournament_id" value={t.id} />
                   <button
