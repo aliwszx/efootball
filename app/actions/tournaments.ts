@@ -184,6 +184,59 @@ export async function joinTournament(formData: FormData) {
   redirect(`/tournaments/${tournamentSlug}?success=joined_pending`)
 }
 
+export async function updateTournament(formData: FormData) {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || profile.role !== 'admin') {
+    throw new Error('Bu əməliyyat üçün icazən yoxdur')
+  }
+
+  const id = String(formData.get('id') || '').trim()
+  const title = String(formData.get('title') || '').trim()
+  const platform = String(formData.get('platform') || '').trim()
+  const format = String(formData.get('format') || '1v1').trim()
+  const entry_fee = Number(formData.get('entry_fee') || 0)
+  const prize_amount = Number(formData.get('prize_amount') || 0)
+  const max_players = Number(formData.get('max_players') || 0)
+  const registration_deadline = String(formData.get('registration_deadline') || '')
+  const start_time = String(formData.get('start_time') || '')
+  const description = String(formData.get('description') || '').trim()
+  const rules = String(formData.get('rules') || '').trim()
+  const status = String(formData.get('status') || 'draft').trim()
+
+  if (!id || !title || !platform || !registration_deadline || !start_time || !max_players) {
+    throw new Error('Bütün vacib sahələri doldur')
+  }
+
+  const slug = slugify(title)
+
+  const { error } = await supabase.from('tournaments').update({
+    title,
+    slug,
+    platform,
+    format,
+    entry_fee,
+    prize_amount,
+    max_players,
+    registration_deadline,
+    start_time,
+    description,
+    rules,
+    status,
+  }).eq('id', id)
+
+  if (error) throw new Error(error.message)
+
+  revalidatePath('/admin/tournaments')
+  revalidatePath('/tournaments')
+  redirect('/admin/tournaments')
+}
+
 export async function setFeaturedTournament(formData: FormData) {
   const supabase = await createClient()
 
