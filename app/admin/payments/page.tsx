@@ -25,7 +25,7 @@ export default async function AdminPaymentsPage() {
 
   const { data: payments, error } = await supabase
     .from('payments')
-    .select('id, user_id, tournament_id, registration_id, provider, provider_payment_id, amount, currency, status, created_at, updated_at')
+    .select('id, user_id, tournament_id, registration_id, provider, provider_payment_id, amount, currency, status, created_at, updated_at, profiles:user_id ( username, full_name ), tournaments:tournament_id ( title )')
     .order('created_at', { ascending: false })
 
   return (
@@ -87,9 +87,15 @@ export default async function AdminPaymentsPage() {
                     <p className="mt-0.5 break-all text-xs text-zinc-300">{payment.id}</p>
                   </div>
 
-                  <div className="rounded-xl border border-[#C50337]/10 bg-[#02060E]/60 px-4 py-3 sm:col-span-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">User ID</p>
-                    <p className="mt-0.5 break-all text-xs text-zinc-300">{payment.user_id || '-'}</p>
+                  <div className="rounded-xl border border-[#C50337]/10 bg-[#02060E]/60 px-4 py-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">İstifadəçi</p>
+                    <p className="mt-0.5 text-sm font-semibold text-white">{(payment.profiles as any)?.full_name || (payment.profiles as any)?.username || '-'}</p>
+                    <p className="text-xs text-zinc-500">@{(payment.profiles as any)?.username || '-'}</p>
+                  </div>
+
+                  <div className="rounded-xl border border-[#C50337]/10 bg-[#02060E]/60 px-4 py-3">
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">Turnir</p>
+                    <p className="mt-0.5 text-sm font-semibold text-white">{(payment.tournaments as any)?.title || '-'}</p>
                   </div>
                 </div>
 
