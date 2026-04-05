@@ -289,51 +289,45 @@ export async function setFeaturedTournament(formData: FormData) {
 
 export type StartTournamentState = { error?: string; success?: string }
 
-// ─── UCL Swiss System: hər komanda üçün 8 oyun (4 ev + 4 səfər) generate edir ───
-// Alqoritm:
-//   1. İştirakçıları qarışdır (random shuffle)
-//   2. Round-robin cüt siyahısından keç, hər tur üçün optimal ev/səfər balansını saxla
-//   3. Hər komandanın tam olaraq 8 oyunu olana qədər davam et
-//   4. Eyni iki komanda bir-biri ilə 2 dəfədən çox oynaya bilməz
+// ─── UCL Swiss System Fikstur Generator ───────────────────────────────────────
+// DB: league_matches.round_no (NOT NULL), league_matches.round (optional)
+// Hər komanda: targetMatches oyun (targetHome ev + targetAway səfər)
+// Eyni iki komanda MAX 1 dəfə qarşılaşır
 function generateSwissFixtures(
-  participantIds: string[]
-): Array<{ home_participant_id: string; away_participant_id: string; round: number }> {
-  const n = participantIds.length
-  // Hər komanda üçün ev/səfər sayacı
-  const homeCount = new Map<string, number>()
-  const awayCount = new Map<string, number>()
-  const matchCount = new Map<string, number>() // toplam oyun sayı
-  const pairCount = new Map<string, number>()  // iki komanda arasında oyun sayı
+  participantIds: string[],
+  targetMatches = 8
+): Array<{ home_participant_id: string; away_participant_id: string; round_no: number }> {
+  const TARGET_HOME = Math.ceil(targetMatches / 2)   // 8 → 4
+  const TARGET_AWAY = Math.floor(targetMatches / 2)  // 8 → 4
+  const MAX_PAIR = 1
+
+  const homeCount  = new Map<string, number>()
+  const matchCount = new Map<string, number>()
+  const pairCount  = new Map<string, number>()
 
   for (const id of participantIds) {
     homeCount.set(id, 0)
-    awayCount.set(id, 0)
     matchCount.set(id, 0)
   }
 
   const pairKey = (a: string, b: string) => [a, b].sort().join('|')
 
-  const fixtures: Array<{ home_participant_id: string; away_participant_id: string; round: number }> = []
+  const fixtures: Array<{
+    home_participant_id: string
+    away_participant_id: string
+    round_no: number
+  }> = []
 
-  // Hər komanda üçün hədəf: 8 oyun (4 ev + 4 səfər)
-  const TARGET_MATCHES = 8
-  const TARGET_HOME = 4
-  const TARGET_AWAY = 4
-  const MAX_PAIR = 1 // Eyni cütlük yalnız 1 dəfə oynayır (UCL kimi)
+  let roundNo = 1
+  const maxRounds = targetMatches * 3 // Təhlükəsizlik limiti
 
-  // Turu idarə et — maksimum n/2 oyun/tur
-  let round = 1
-  const maxRounds = TARGET_MATCHES * 2 // Təhlükəsizlik limiti
-
-  while (round <= maxRounds) {
-    // Hələ oyun oynamalı olan komandaları tap
+  while (roundNo <= maxRounds) {
     const available = participantIds.filter(
-      (id) => (matchCount.get(id) ?? 0) < TARGET_MATCHES
+      (id) => (matchCount.get(id) ?? 0) < targetMatches
     )
-
     if (available.length < 2) break
 
-    // Qarışdır
+    // Fisher-Yates shuffle
     for (let i = available.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [available[i], available[j]] = [available[j], available[i]]
@@ -345,25 +339,19 @@ function generateSwissFixtures(
     for (let i = 0; i < available.length; i++) {
       const a = available[i]
       if (usedThisRound.has(a)) continue
-      if ((matchCount.get(a) ?? 0) >= TARGET_MATCHES) continue
+      if ((matchCount.get(a) ?? 0) >= targetMatches) continue
 
       for (let j = i + 1; j < available.length; j++) {
         const b = available[j]
         if (usedThisRound.has(b)) continue
-        if ((matchCount.get(b) ?? 0) >= TARGET_MATCHES) continue
+        if ((matchCount.get(b) ?? 0) >= targetMatches) continue
+        if ((pairCount.get(pairKey(a, b)) ?? 0) >= MAX_PAIR) continue
 
-        const pk = pairKey(a, b)
-        if ((pairCount.get(pk) ?? 0) >= MAX_PAIR) continue
-
-        // Ev/səfər müəyyən et
         const aHome = homeCount.get(a) ?? 0
-        const aAway = awayCount.get(a) ?? 0
         const bHome = homeCount.get(b) ?? 0
-        const bAway = awayCount.get(b) ?? 0
 
+        // Ev sahibini müəyyən et — daha çox ev ehtiyacı olan ev sahibi olur
         let home: string, away: string
-
-        // a-nın ev ehtiyacı > b-nin ev ehtiyacı?
         const aNeedsHome = TARGET_HOME - aHome
         const bNeedsHome = TARGET_HOME - bHome
 
@@ -376,17 +364,14 @@ function generateSwissFixtures(
         } else if (bHome < TARGET_HOME) {
           home = b; away = a
         } else {
-          // Hər ikisi ev limitini dolduruб, bu cüt artıq mümkün deyil
-          continue
+          continue // Hər ikisi ev limitini doldurub
         }
 
-        // Əlavə et
-        fixtures.push({ home_participant_id: home, away_participant_id: away, round })
+        fixtures.push({ home_participant_id: home, away_participant_id: away, round_no: roundNo })
         homeCount.set(home, (homeCount.get(home) ?? 0) + 1)
-        awayCount.set(away, (awayCount.get(away) ?? 0) + 1)
         matchCount.set(home, (matchCount.get(home) ?? 0) + 1)
         matchCount.set(away, (matchCount.get(away) ?? 0) + 1)
-        pairCount.set(pk, (pairCount.get(pk) ?? 0) + 1)
+        pairCount.set(pairKey(a, b), (pairCount.get(pairKey(a, b)) ?? 0) + 1)
         usedThisRound.add(a)
         usedThisRound.add(b)
         foundAny = true
@@ -395,7 +380,7 @@ function generateSwissFixtures(
     }
 
     if (!foundAny) break
-    round++
+    roundNo++
   }
 
   return fixtures
@@ -419,18 +404,21 @@ export async function startTournament(
   const tournamentId = String(formData.get('tournament_id') || '').trim()
   if (!tournamentId) return { error: 'Turnir ID tapılmadı.' }
 
-  // Turnir statusunu yoxla
+  // ── Turniri yoxla — league_match_count-u da oxu ──
   const { data: tournament, error: tErr } = await supabase
     .from('tournaments')
-    .select('id, status, title')
+    .select('id, status, title, league_match_count, participant_limit, competition_stage')
     .eq('id', tournamentId)
     .single()
 
   if (tErr || !tournament) return { error: 'Turnir tapılmadı.' }
-  if (tournament.status === 'ongoing') return { error: 'Turnir artıq başlayıb.' }
+  if (tournament.status === 'ongoing')   return { error: 'Turnir artıq başlayıb.' }
   if (tournament.status === 'completed') return { error: 'Turnir artıq tamamlanıb.' }
 
-  // Confirmed registrationları al
+  // Hər oyunçunun oynayacağı matç sayı (default: 8, DB-dən oxunur)
+  const leagueMatchCount: number = tournament.league_match_count ?? 8
+
+  // ── Confirmed registrationları al ──
   const { data: registrations, error: regErr } = await supabase
     .from('tournament_registrations')
     .select('id, user_id')
@@ -442,7 +430,7 @@ export async function startTournament(
     return { error: 'Ən azı 2 təsdiqlənmiş iştirakçı lazımdır.' }
   }
 
-  // Artıq participants-də olanları yoxla (duplicate qarşısını al)
+  // ── Artıq participants-də olanları yoxla (duplicate qarşısını al) ──
   const { data: existingParticipants } = await supabase
     .from('tournament_participants')
     .select('id, user_id')
@@ -455,8 +443,9 @@ export async function startTournament(
     .map((r) => ({
       tournament_id: tournamentId,
       user_id: r.user_id,
-      entry_status: 'confirmed',
+      entry_status: 'confirmed',      // tournament_participants.entry_status
       registration_id: r.id,
+      qualified_to: 'none',           // tournament_participants.qualified_to DEFAULT
     }))
 
   let allParticipantIds: string[] = (existingParticipants || []).map((p: any) => p.id)
@@ -467,34 +456,37 @@ export async function startTournament(
       .insert(newParticipants)
       .select('id')
 
-    if (insertErr) return { error: `Iştirakçılar əlavə edilmədi: ${insertErr.message}` }
+    if (insertErr) return { error: `İştirakçılar əlavə edilmədi: ${insertErr.message}` }
     allParticipantIds = [...allParticipantIds, ...(inserted || []).map((p: any) => p.id)]
   }
 
   // ── 1. STANDINGS: Hər iştirakçı üçün boş sətir yarat ──
-  // Mövcud standings-i yoxla
+  // tournament_standings sütunları: tournament_id, participant_id,
+  //   played, wins, draws, losses, goals_for, goals_against,
+  //   goal_difference, points, rank
   const { data: existingStandings } = await supabase
     .from('tournament_standings')
     .select('participant_id')
     .eq('tournament_id', tournamentId)
 
-  const existingStandingIds = new Set((existingStandings || []).map((s: any) => s.participant_id))
+  const existingStandingIds = new Set(
+    (existingStandings || []).map((s: any) => s.participant_id)
+  )
 
   const standingsToInsert = allParticipantIds
     .filter((pid) => !existingStandingIds.has(pid))
     .map((pid, idx) => ({
-      tournament_id: tournamentId,
-      participant_id: pid,
-      played: 0,
-      wins: 0,
-      draws: 0,
-      losses: 0,
-      goals_for: 0,
-      goals_against: 0,
+      tournament_id:   tournamentId,
+      participant_id:  pid,
+      played:          0,
+      wins:            0,
+      draws:           0,
+      losses:          0,
+      goals_for:       0,
+      goals_against:   0,
       goal_difference: 0,
-      points: 0,
-      rank: idx + 1,
-      updated_at: new Date().toISOString(),
+      points:          0,
+      rank:            idx + 1,
     }))
 
   if (standingsToInsert.length > 0) {
@@ -508,37 +500,40 @@ export async function startTournament(
   }
 
   // ── 2. FİKSTÜRLƏR: UCL Swiss System ilə generate et ──
-  // Artıq mövcud fikstürləri yoxla
+  // league_matches sütunları: tournament_id, round_no (NOT NULL),
+  //   home_participant_id, away_participant_id, match_status
+  //   + optional: round (integer DEFAULT 1)
   const { data: existingMatches } = await supabase
     .from('league_matches')
     .select('id')
     .eq('tournament_id', tournamentId)
 
   if (!existingMatches || existingMatches.length === 0) {
-    // Swiss system fikstürlərini generate et
-    const fixtures = generateSwissFixtures(allParticipantIds)
+    const fixtures = generateSwissFixtures(allParticipantIds, leagueMatchCount)
 
     if (fixtures.length === 0) {
-      return { error: 'Fikstürlər generate edilə bilmədi. İştirakçı sayını yoxlayın.' }
+      return {
+        error: 'Fikstürlər generate edilə bilmədi. İştirakçı sayı kifayət etmir.',
+      }
     }
 
+    // league_matches.round_no = NOT NULL → fixtures-dən alırıq
+    // league_matches.round = optional, eyni dəyəri veririk (uyğunluq üçün)
     const matchesToInsert = fixtures.map((f) => ({
-      tournament_id: tournamentId,
-      home_participant_id: f.home_participant_id,
-      away_participant_id: f.away_participant_id,
-      round: f.round,
-      match_status: 'scheduled',
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
+      tournament_id:        tournamentId,
+      home_participant_id:  f.home_participant_id,
+      away_participant_id:  f.away_participant_id,
+      round_no:             f.round_no,   // ← DB sxeminə uyğun (NOT NULL)
+      round:                f.round_no,   // ← optional sütun, eyni dəyər
+      match_status:         'scheduled',
     }))
 
-    // Batch insert (50-lik qruplarla)
+    // Batch insert — 50-lik qruplarla (böyük turnir üçün)
     const BATCH = 50
     for (let i = 0; i < matchesToInsert.length; i += BATCH) {
-      const batch = matchesToInsert.slice(i, i + BATCH)
       const { error: matchInsertErr } = await supabase
         .from('league_matches')
-        .insert(batch)
+        .insert(matchesToInsert.slice(i, i + BATCH))
 
       if (matchInsertErr) {
         return { error: `Matçlar əlavə edilmədi: ${matchInsertErr.message}` }
@@ -546,10 +541,15 @@ export async function startTournament(
     }
   }
 
-  // ── 3. Turnir statusunu "ongoing" et ──
+  // ── 3. Turnir status + competition_stage yenilə ──
+  // tournaments.status       → 'ongoing'
+  // tournaments.competition_stage → 'league'
   const { error: updateErr } = await supabase
     .from('tournaments')
-    .update({ status: 'ongoing' })
+    .update({
+      status:            'ongoing',
+      competition_stage: 'league',  // ← DB sxeминдəки 'league' dəyəri
+    })
     .eq('id', tournamentId)
 
   if (updateErr) return { error: `Turnir statusu yenilənmədi: ${updateErr.message}` }
@@ -557,16 +557,16 @@ export async function startTournament(
   revalidatePath('/admin/tournaments')
   revalidatePath('/tournaments')
   revalidatePath('/my-matches')
-  revalidatePath(`/tournaments`)
 
   const totalParticipants = allParticipantIds.length
-  const { data: createdMatches } = await supabase
-    .from('league_matches')
-    .select('id', { count: 'exact', head: true })
-    .eq('tournament_id', tournamentId)
+  const totalFixtures = (
+    !existingMatches || existingMatches.length === 0
+      ? generateSwissFixtures(allParticipantIds, leagueMatchCount).length
+      : existingMatches.length
+  )
 
   return {
-    success: `✅ Turnir başladı! ${totalParticipants} iştirakçı, UCL Swiss formatında fikstürlər avtomatik yaradıldı.`,
+    success: `✅ Turnir başladı! ${totalParticipants} iştirakçı, hər biri ${leagueMatchCount} matç (Swiss/UCL formatı). Cədvəl və fikstürlər avtomatik yaradıldı.`,
   }
 }
 
