@@ -2,6 +2,7 @@
 
 import { revalidatePath } from 'next/cache'
 import { createClient } from '@/lib/supabase/server'
+import sharp from 'sharp'
 
 export type ProfileActionState = {
   error?: string
@@ -33,21 +34,38 @@ export async function updateProfileAvatar(
   if (!avatar.type.startsWith('image/')) {
     return { error: 'Yalnız şəkil faylı yükləyə bilərsən.' }
   }
-  const maxSize = 3 * 1024 * 1024
+  // 5 MB-a qədər qəbul et — sharp sıxışdıracaq
+  const maxSize = 5 * 1024 * 1024
   if (avatar.size > maxSize) {
-    return { error: 'Şəkil maksimum 3 MB ola bilər.' }
+    return { error: 'Şəkil maksimum 5 MB ola bilər.' }
   }
 
-  const extension = avatar.name.includes('.') ? avatar.name.split('.').pop() : 'png'
-  const safeName = sanitizeFilename(avatar.name || `avatar.${extension}`)
-  const filePath = `profiles/${user.id}/${Date.now()}-${safeName}`
+  // Sharp ilə 300x300 px-ə resize et, WebP formatına çevir (~20-60 KB olur)
+  const arrayBuffer = await avatar.arrayBuffer()
+  const inputBuffer = Buffer.from(arrayBuffer)
+
+  let resizedBuffer: Buffer
+  try {
+    resizedBuffer = await sharp(inputBuffer)
+      .resize(300, 300, {
+        fit: 'cover',       // mərkəzdən kəsir, nisbəti qoruyur
+        position: 'center',
+      })
+      .webp({ quality: 80 }) // WebP, keyfiyyət 80% — ~30-80 KB
+      .toBuffer()
+  } catch {
+    return { error: 'Şəkil emal edilərkən xəta baş verdi.' }
+  }
+
+  const safeName = sanitizeFilename(avatar.name || 'avatar')
+  const filePath = `profiles/${user.id}/${Date.now()}-${safeName}.webp`
 
   const { error: uploadError } = await supabase.storage
     .from('avatars')
-    .upload(filePath, avatar, {
+    .upload(filePath, resizedBuffer, {
       cacheControl: '3600',
       upsert: true,
-      contentType: avatar.type || 'image/png',
+      contentType: 'image/webp',
     })
 
   if (uploadError) {
