@@ -34,14 +34,13 @@ h1, h2, h3, h4, h5, h6 {
   margin: 0;
 }
 
-/* Scrollbar */
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 99px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(34,211,238,0.25); }
+::-webkit-scrollbar-thumb { background: rgba(197,3,55,0.2); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(197,3,55,0.45); }
 
 ::selection {
-  background: rgba(34, 211, 238, 0.18);
+  background: rgba(197, 3, 55, 0.25);
   color: #fff;
 }
 

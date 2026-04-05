@@ -2,9 +2,9 @@ import { createClient } from '@/lib/supabase/server'
 
 const MEDAL = ['🥇', '🥈', '🥉']
 const RANK_STYLES = [
-  'border-yellow-400/25 bg-gradient-to-b from-yellow-500/10 to-yellow-500/5',
+  'border-[#C50337]/30 bg-gradient-to-b from-[#C50337]/15 to-[#C50337]/5',
   'border-zinc-400/20 bg-gradient-to-b from-zinc-400/8 to-zinc-400/3',
-  'border-amber-600/25 bg-gradient-to-b from-amber-700/10 to-amber-700/5',
+  'border-[#8B0224]/25 bg-gradient-to-b from-[#8B0224]/12 to-[#8B0224]/4',
 ]
 
 export default async function LeaderboardPage() {
@@ -47,9 +47,9 @@ export default async function LeaderboardPage() {
       <div className="mx-auto max-w-6xl">
 
         {/* Hero */}
-        <section className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-white/[0.03] p-7 backdrop-blur-xl sm:p-10">
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-cyan-500/5 via-transparent to-blue-600/5" />
-          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-cyan-400">Ranking</p>
+        <section className="relative overflow-hidden rounded-[28px] border border-[#C50337]/15 bg-[#C50337]/5 p-7 backdrop-blur-xl sm:p-10">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#C50337]/8 via-transparent to-[#8B0224]/5" />
+          <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-[#ff4d6d]">Ranking</p>
           <h1 className="text-4xl font-bold sm:text-6xl" style={{ fontFamily: 'var(--font-syne)' }}>
             Ümumi Leaderboard
           </h1>
@@ -70,7 +70,7 @@ export default async function LeaderboardPage() {
           )}
 
           {!entries?.length ? (
-            <div className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 text-zinc-400">
+            <div className="rounded-2xl border border-[#C50337]/10 bg-[#C50337]/4 p-6 text-zinc-400">
               Hələ ümumi leaderboard məlumatı yoxdur.
             </div>
           ) : (
@@ -89,17 +89,17 @@ export default async function LeaderboardPage() {
                       className={`relative overflow-hidden rounded-[24px] border p-5 backdrop-blur-xl transition-transform hover:scale-[1.01] ${RANK_STYLES[index]}`}>
                       <div className="mb-5 flex items-center justify-between">
                         <span className="text-2xl">{MEDAL[index]}</span>
-                        <span className="rounded-full border border-white/[0.1] bg-black/30 px-3 py-1 text-xs font-bold text-white">
+                        <span className="rounded-full border border-[#C50337]/20 bg-[#C50337]/10 px-3 py-1 text-xs font-bold text-[#ff4d6d]">
                           {item.global_points} xal
                         </span>
                       </div>
 
                       <div className="flex items-center gap-3">
-                        <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-white/20 bg-white/5">
+                        <div className="h-14 w-14 flex-shrink-0 overflow-hidden rounded-full border-2 border-[#C50337]/25 bg-[#C50337]/10">
                           {avatarUrl ? (
                             <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center text-lg font-bold text-cyan-300">
+                            <div className="flex h-full w-full items-center justify-center text-lg font-bold text-[#ff4d6d]">
                               {avatarLetter}
                             </div>
                           )}
@@ -113,11 +113,11 @@ export default async function LeaderboardPage() {
                       </div>
 
                       <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
-                        <div className="rounded-xl border border-white/[0.07] bg-black/25 px-3 py-2.5">
+                        <div className="rounded-xl border border-[#C50337]/10 bg-[#02060E]/40 px-3 py-2.5">
                           <p className="text-[11px] text-zinc-500">Qələbə</p>
                           <p className="mt-0.5 font-bold text-white">{item.wins_total}</p>
                         </div>
-                        <div className="rounded-xl border border-white/[0.07] bg-black/25 px-3 py-2.5">
+                        <div className="rounded-xl border border-[#C50337]/10 bg-[#02060E]/40 px-3 py-2.5">
                           <p className="text-[11px] text-zinc-500">Bərabərlik</p>
                           <p className="mt-0.5 font-bold text-white">{item.draws_total}</p>
                         </div>
@@ -128,18 +128,14 @@ export default async function LeaderboardPage() {
               </div>
 
               {/* Table */}
-              <div className="overflow-hidden rounded-[24px] border border-white/[0.08] bg-white/[0.02] backdrop-blur-xl">
+              <div className="overflow-hidden rounded-[24px] border border-[#C50337]/10 bg-[#C50337]/3 backdrop-blur-xl">
                 <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
                     <thead>
-                      <tr className="border-b border-white/[0.07]">
-                        <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">#</th>
-                        <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">İstifadəçi</th>
-                        <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">Qələbə</th>
-                        <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">Bərabərlik</th>
-                        <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">Playoff</th>
-                        <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">Final</th>
-                        <th className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">Xal</th>
+                      <tr className="border-b border-[#C50337]/10">
+                        {['#', 'İstifadəçi', 'Qələbə', 'Bərabərlik', 'Playoff', 'Final', 'Xal'].map((h) => (
+                          <th key={h} className="px-5 py-4 text-left text-xs font-semibold uppercase tracking-wider text-zinc-500">{h}</th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
@@ -149,11 +145,10 @@ export default async function LeaderboardPage() {
                         const username = profile?.username || 'username'
                         const avatarUrl = profile?.avatar_url || ''
                         const avatarLetter = username.charAt(0).toUpperCase()
-                        const isTop3 = index < 3
 
                         return (
                           <tr key={item.user_id}
-                            className={`border-b border-white/[0.05] transition-colors hover:bg-white/[0.03] ${isTop3 ? 'bg-white/[0.01]' : ''}`}>
+                            className="border-b border-[#C50337]/5 transition-colors hover:bg-[#C50337]/5">
                             <td className="px-5 py-4">
                               <span className={`text-sm font-bold ${index === 0 ? 'text-yellow-400' : index === 1 ? 'text-zinc-300' : index === 2 ? 'text-amber-500' : 'text-zinc-600'}`}>
                                 {index + 1}
@@ -161,11 +156,11 @@ export default async function LeaderboardPage() {
                             </td>
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full border border-white/[0.12] bg-white/[0.05]">
+                                <div className="h-9 w-9 flex-shrink-0 overflow-hidden rounded-full border border-[#C50337]/15 bg-[#C50337]/8">
                                   {avatarUrl ? (
                                     <img src={avatarUrl} alt={displayName} className="h-full w-full object-cover" />
                                   ) : (
-                                    <div className="flex h-full w-full items-center justify-center text-xs font-bold text-cyan-300">
+                                    <div className="flex h-full w-full items-center justify-center text-xs font-bold text-[#ff4d6d]">
                                       {avatarLetter}
                                     </div>
                                   )}
@@ -181,7 +176,7 @@ export default async function LeaderboardPage() {
                             <td className="px-5 py-4 text-zinc-300">{item.playoff_qualifications_total}</td>
                             <td className="px-5 py-4 text-zinc-300">{item.final_appearances_total}</td>
                             <td className="px-5 py-4">
-                              <span className="font-bold text-white">{item.global_points}</span>
+                              <span className="font-bold text-[#ff4d6d]">{item.global_points}</span>
                             </td>
                           </tr>
                         )

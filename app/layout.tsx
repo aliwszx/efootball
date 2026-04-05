@@ -25,14 +25,14 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="az">
-      <body className={`${syne.variable} ${dmSans.variable} min-h-screen bg-[#04050a] text-white antialiased font-sans`}>
+      <body className={`${syne.variable} ${dmSans.variable} min-h-screen bg-[#02060E] text-white antialiased font-sans`}>
         <div className="relative min-h-screen overflow-x-hidden">
 
-          {/* Arxa fon qradientləri */}
+          {/* Arxa fon qradientləri — Crimson Noir */}
           <div className="pointer-events-none fixed inset-0 -z-10">
-            <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-cyan-500/6 blur-[120px]" />
-            <div className="absolute right-[-10%] top-[30%] h-[400px] w-[400px] rounded-full bg-blue-600/5 blur-[100px]" />
-            <div className="absolute bottom-0 left-[-5%] h-[350px] w-[350px] rounded-full bg-cyan-400/4 blur-[100px]" />
+            <div className="absolute left-1/2 top-0 h-[600px] w-[900px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C50337]/8 blur-[120px]" />
+            <div className="absolute right-[-10%] top-[30%] h-[400px] w-[400px] rounded-full bg-[#C50337]/6 blur-[100px]" />
+            <div className="absolute bottom-0 left-[-5%] h-[350px] w-[350px] rounded-full bg-[#C50337]/4 blur-[100px]" />
             {/* Noise texture */}
             <svg className="absolute inset-0 h-full w-full opacity-[0.025]" xmlns="http://www.w3.org/2000/svg">
               <filter id="noise">

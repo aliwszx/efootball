@@ -12,10 +12,10 @@ function formatDate(value?: string | null) {
 }
 
 const STATUS_STYLES: Record<string, string> = {
-  open:   'border-emerald-400/25 bg-emerald-400/10 text-emerald-300',
-  active: 'border-cyan-400/25 bg-cyan-400/10 text-cyan-300',
+  open:   'border-[#C50337]/30 bg-[#C50337]/10 text-[#ff4d6d]',
+  active: 'border-[#C50337]/25 bg-[#C50337]/8 text-[#ff6b81]',
   draft:  'border-zinc-500/25 bg-zinc-500/10 text-zinc-400',
-  closed: 'border-red-400/25 bg-red-400/10 text-red-300',
+  closed: 'border-zinc-600/25 bg-zinc-600/10 text-zinc-500',
 }
 
 export default async function TournamentsPage() {
@@ -43,11 +43,11 @@ export default async function TournamentsPage() {
       <div className="mx-auto max-w-6xl">
 
         {/* Hero */}
-        <section className="relative overflow-hidden rounded-[28px] border border-white/[0.08] bg-white/[0.03] p-7 backdrop-blur-xl sm:p-10">
-          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-600/5 via-transparent to-cyan-500/5" />
+        <section className="relative overflow-hidden rounded-[28px] border border-[#C50337]/15 bg-[#C50337]/5 p-7 backdrop-blur-xl sm:p-10">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#C50337]/8 via-transparent to-[#8B0224]/5" />
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-cyan-400">Turnirlər</p>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-[#ff4d6d]">Turnirlər</p>
               <h1 className="text-4xl font-bold sm:text-6xl" style={{ fontFamily: 'var(--font-syne)' }}>
                 Aktiv turnirlər
               </h1>
@@ -57,7 +57,7 @@ export default async function TournamentsPage() {
             </div>
             {user && (
               <Link href="/dashboard/my-tournaments"
-                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-cyan-400 to-blue-500 px-5 py-2.5 text-sm font-semibold text-black transition-all hover:shadow-lg hover:shadow-cyan-500/20 hover:scale-[1.02] flex-shrink-0">
+                className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#C50337] to-[#8B0224] px-5 py-2.5 text-sm font-semibold text-white transition-all hover:shadow-lg hover:shadow-[#C50337]/25 hover:scale-[1.02] flex-shrink-0">
                 Mənim turnirlərim
               </Link>
             )}
@@ -71,17 +71,16 @@ export default async function TournamentsPage() {
               const title = tournament.title || 'Adsız turnir'
               const description = tournament.description || tournament.details || 'Təsvir əlavə edilməyib'
               const format = tournament.format || tournament.mode || tournament.type || 'Təyin edilməyib'
-              const participants = tournament.max_players || tournament.player_limit || tournament.participants_limit || '—'
-              const fee = tournament.entry_fee ?? tournament.price ?? tournament.registration_fee ?? 0
+              const participants = tournament.max_players || tournament.player_limit || '—'
+              const fee = tournament.entry_fee ?? tournament.price ?? 0
               const status = (tournament.status || 'active').toLowerCase()
-              const startDate = tournament.start_date || tournament.starts_at || tournament.event_date || tournament.created_at
+              const startDate = tournament.start_date || tournament.starts_at || tournament.created_at
               const statusStyle = STATUS_STYLES[status] || STATUS_STYLES['active']
 
               return (
                 <div key={tournament.id}
-                  className="group relative flex flex-col overflow-hidden rounded-[24px] border border-white/[0.08] bg-white/[0.03] p-6 backdrop-blur-xl transition-all duration-200 hover:border-white/[0.14] hover:bg-white/[0.05]">
+                  className="group relative flex flex-col overflow-hidden rounded-[24px] border border-[#C50337]/10 bg-[#C50337]/4 p-6 backdrop-blur-xl transition-all duration-200 hover:border-[#C50337]/20 hover:bg-[#C50337]/8">
 
-                  {/* Top row */}
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <h2 className="text-xl font-bold leading-snug text-white" style={{ fontFamily: 'var(--font-syne)' }}>
                       {title}
@@ -91,11 +90,8 @@ export default async function TournamentsPage() {
                     </span>
                   </div>
 
-                  <p className="mb-5 line-clamp-2 text-sm leading-relaxed text-zinc-500">
-                    {description}
-                  </p>
+                  <p className="mb-5 line-clamp-2 text-sm leading-relaxed text-zinc-500">{description}</p>
 
-                  {/* Stats grid */}
                   <div className="mt-auto grid grid-cols-2 gap-2 text-sm">
                     {[
                       { label: 'Format', value: format },
@@ -103,16 +99,16 @@ export default async function TournamentsPage() {
                       { label: 'Qeydiyyat', value: typeof fee === 'number' ? `${fee} ₼` : fee },
                       { label: 'Başlama', value: formatDate(startDate) },
                     ].map(({ label, value }) => (
-                      <div key={label} className="rounded-xl border border-white/[0.07] bg-black/20 px-3 py-2.5">
+                      <div key={label} className="rounded-xl border border-[#C50337]/10 bg-[#02060E]/60 px-3 py-2.5">
                         <p className="text-[10px] font-semibold uppercase tracking-wider text-zinc-600">{label}</p>
                         <p className="mt-0.5 text-sm font-medium text-zinc-200">{value}</p>
                       </div>
                     ))}
                   </div>
 
-                  <div className="mt-4 flex items-center justify-between">
+                  <div className="mt-4">
                     <Link href={`/tournaments/${tournament.slug}`}
-                      className="rounded-xl border border-white/[0.1] bg-white/[0.05] px-4 py-2 text-sm font-medium text-zinc-200 transition-all hover:bg-white/[0.1] hover:text-white">
+                      className="rounded-xl border border-[#C50337]/20 bg-[#C50337]/10 px-4 py-2 text-sm font-medium text-[#ff4d6d] transition-all hover:bg-[#C50337]/20 hover:text-white">
                       Ətraflı bax →
                     </Link>
                   </div>
@@ -120,7 +116,7 @@ export default async function TournamentsPage() {
               )
             })
           ) : (
-            <div className="col-span-full rounded-[24px] border border-white/[0.08] bg-white/[0.03] p-8 text-center text-zinc-500">
+            <div className="col-span-full rounded-[24px] border border-[#C50337]/10 bg-[#C50337]/4 p-8 text-center text-zinc-500">
               Hələ turnir yoxdur.
             </div>
           )}
