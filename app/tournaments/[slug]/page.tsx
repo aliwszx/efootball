@@ -4,12 +4,15 @@ import { joinTournament } from '@/app/actions/tournaments'
 
 type TournamentDetailPageProps = {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ success?: string }>
 }
 
 export default async function TournamentDetailPage({
   params,
+  searchParams,
 }: TournamentDetailPageProps) {
   const { slug } = await params
+  const { success } = await searchParams
   const supabase = await createClient()
 
   const {
@@ -53,12 +56,16 @@ export default async function TournamentDetailPage({
   if (user) {
     const { data: registration } = await supabase
       .from('tournament_registrations')
-      .select('id')
+      .select('id, registration_status')
       .eq('tournament_id', tournament.id)
       .eq('user_id', user.id)
+      .neq('registration_status', 'cancelled')
       .maybeSingle()
 
     alreadyJoined = !!registration
+    var registrationStatus = registration?.registration_status || null
+  } else {
+    var registrationStatus: string | null = null
   }
 
   const isFull = confirmedCount >= tournament.max_players
@@ -178,19 +185,43 @@ export default async function TournamentDetailPage({
           </div>
 
           <div className="mt-6 space-y-3">
+            {/* Yeni qoşulma uğurlu mesajı */}
+            {success === 'joined_pending' && (
+              <div className="rounded-2xl border border-amber-400/25 bg-amber-500/10 p-4">
+                <p className="text-sm font-semibold text-amber-300">⏳ Qeydiyyatın qəbul edildi!</p>
+                <p className="mt-1 text-xs text-amber-400/80">
+                  Ödənişin admin tərəfindən təsdiqlənməsini gözlə. Təsdiq edildikdən sonra turnirdə görünəcəksən.
+                </p>
+              </div>
+            )}
+
             {!user && (
               <div className="rounded-2xl border border-yellow-400/20 bg-yellow-500/10 p-4 text-yellow-200">
                 Turnirə qoşulmaq üçün əvvəl login olmalısan.
               </div>
             )}
 
-            {user && alreadyJoined && (
-              <div className="rounded-2xl border border-[#C50337]/20 bg-[#C50337]/10 p-4 text-[#ff6b81]">
-                Sən artıq bu turnirə qoşulmusan.
+            {/* Pending - ödəniş gözlənilir */}
+            {user && alreadyJoined && registrationStatus === 'pending' && success !== 'joined_pending' && (
+              <div className="rounded-2xl border border-amber-400/25 bg-amber-500/10 p-4">
+                <p className="text-sm font-semibold text-amber-300">⏳ Ödəniş gözlənilir</p>
+                <p className="mt-1 text-xs text-amber-400/80">
+                  Qeydiyyatın qəbul edilib, admin ödənişini təsdiq etməsini gözlə.
+                </p>
               </div>
             )}
 
-            {user && deadlinePassed && (
+            {/* Confirmed - tam qoşulub */}
+            {user && alreadyJoined && registrationStatus === 'confirmed' && (
+              <div className="rounded-2xl border border-emerald-400/25 bg-emerald-500/10 p-4">
+                <p className="text-sm font-semibold text-emerald-300">✓ Turnirdə iştirak edirsən</p>
+                <p className="mt-1 text-xs text-emerald-400/80">
+                  Ödənişin təsdiqlənib. Turnir başlama vaxtını gözlə.
+                </p>
+              </div>
+            )}
+
+            {user && deadlinePassed && !alreadyJoined && (
               <div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-red-200">
                 Qeydiyyat müddəti bitib.
               </div>
