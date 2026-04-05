@@ -369,3 +369,42 @@ export async function startTournament(
 
   return { success: `${registrations.length} iştirakçı əlavə edildi. Turnir başladı!` }
 }
+
+export type EndTournamentState = { error?: string; success?: string }
+
+export async function endTournament(
+  _prevState: EndTournamentState,
+  formData: FormData
+): Promise<EndTournamentState> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || profile.role !== 'admin') {
+    return { error: 'Bu əməliyyat üçün icazən yoxdur.' }
+  }
+
+  const tournamentId = String(formData.get('tournament_id') || '').trim()
+  if (!tournamentId) return { error: 'Turnir ID tapılmadı.' }
+
+  const { data: tournament } = await supabase
+    .from('tournaments').select('id, status').eq('id', tournamentId).single()
+
+  if (!tournament) return { error: 'Turnir tapılmadı.' }
+  if (tournament.status !== 'ongoing') return { error: 'Turnir davam etmir.' }
+
+  const { error } = await supabase
+    .from('tournaments')
+    .update({ status: 'completed' })
+    .eq('id', tournamentId)
+
+  if (error) return { error: `Status yenilənmədi: ${error.message}` }
+
+  revalidatePath('/admin/tournaments')
+  revalidatePath('/tournaments')
+
+  return { success: 'Turnir tamamlandı.' }
+}
