@@ -17,11 +17,18 @@ export default async function AdminDisputesPage() {
   const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).maybeSingle()
   if (!profile || profile.role !== 'admin') redirect('/profile')
 
-  const { data: matches, error } = await supabase
-    .from('league_matches')
-    .select('id, tournament_id, round_no, home_participant_id, away_participant_id, match_status, scheduled_at')
-    .eq('match_status', 'disputed')
-    .order('scheduled_at', { ascending: false })
+  const [{ data: leagueDisputes, error }, { data: knockoutDisputes }] = await Promise.all([
+    supabase
+      .from('league_matches')
+      .select('id, tournament_id, round_no, home_participant_id, away_participant_id, match_status, scheduled_at')
+      .eq('match_status', 'disputed')
+      .order('scheduled_at', { ascending: false }),
+    supabase
+      .from('knockout_matches')
+      .select('id, tournament_id, stage, leg_no, home_participant_id, away_participant_id, match_status, scheduled_at')
+      .eq('match_status', 'disputed')
+      .order('scheduled_at', { ascending: false }),
+  ])
 
   if (error) {
     return (
@@ -32,6 +39,24 @@ export default async function AdminDisputesPage() {
       </main>
     )
   }
+
+  const stageLabel: Record<string, string> = {
+    quarterfinal: 'Çərək Final',
+    semifinal: 'Yarımfinal',
+    final: 'Final',
+    round_of_16: '1/8 Final',
+  }
+
+  const matches = [
+    ...(leagueDisputes || []).map((m: any) => ({
+      ...m,
+      _roundLabel: `Round ${m.round_no}`,
+    })),
+    ...(knockoutDisputes || []).map((m: any) => ({
+      ...m,
+      _roundLabel: `${stageLabel[m.stage] ?? m.stage}${m.leg_no ? ` — Leg ${m.leg_no}` : ''}`,
+    })),
+  ]
 
   const tournamentIds = Array.from(new Set((matches || []).map((m: any) => m.tournament_id)))
   const participantIds = Array.from(new Set((matches || []).flatMap((m: any) => [m.home_participant_id, m.away_participant_id]).filter(Boolean)))
@@ -96,7 +121,7 @@ export default async function AdminDisputesPage() {
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                   <div>
                     <p className="text-xs font-semibold uppercase tracking-wider text-[#ff4d6d]">{tournament?.title || 'Turnir'}</p>
-                    <h2 className="mt-1 text-2xl font-bold" style={{ fontFamily: 'var(--font-poppins)' }}>Round {match.round_no}</h2>
+                    <h2 className="mt-1 text-2xl font-bold" style={{ fontFamily: 'var(--font-poppins)' }}>{(match as any)._roundLabel}</h2>
                     <p className="mt-1.5 text-zinc-400">
                       <span className="text-white">{homeProfile?.username || 'User'}</span>
                       <span className="mx-2 text-zinc-600">vs</span>
