@@ -286,3 +286,81 @@ export async function setFeaturedTournament(formData: FormData) {
   revalidatePath('/tournaments')
   revalidatePath('/admin/tournaments')
 }
+
+export async function startTournament(formData: FormData): Promise<{ error?: string; success?: string }> {
+  const supabase = await createClient()
+
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: profile } = await supabase
+    .from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || profile.role !== 'admin') {
+    return { error: 'Bu əməliyyat üçün icazən yoxdur.' }
+  }
+
+  const tournamentId = String(formData.get('tournament_id') || '').trim()
+  if (!tournamentId) return { error: 'Turnir ID tapılmadı.' }
+
+  // Turnir statusunu yoxla
+  const { data: tournament, error: tErr } = await supabase
+    .from('tournaments')
+    .select('id, status, title')
+    .eq('id', tournamentId)
+    .single()
+
+  if (tErr || !tournament) return { error: 'Turnir tapılmadı.' }
+  if (tournament.status === 'ongoing') return { error: 'Turnir artıq başlayıb.' }
+  if (tournament.status === 'completed') return { error: 'Turnir artıq tamamlanıb.' }
+
+  // Confirmed registrationları al
+  const { data: registrations, error: regErr } = await supabase
+    .from('tournament_registrations')
+    .select('id, user_id')
+    .eq('tournament_id', tournamentId)
+    .eq('registration_status', 'confirmed')
+
+  if (regErr) return { error: `Qeydiyyatlar oxunmadı: ${regErr.message}` }
+  if (!registrations || registrations.length === 0) {
+    return { error: 'Heç bir təsdiqlənmiş qeydiyyat yoxdur.' }
+  }
+
+  // Artıq participants-də olanları yoxla (duplicate qarşısını al)
+  const { data: existingParticipants } = await supabase
+    .from('tournament_participants')
+    .select('user_id')
+    .eq('tournament_id', tournamentId)
+
+  const existingUserIds = new Set((existingParticipants || []).map((p: any) => p.user_id))
+
+  const newParticipants = registrations
+    .filter((r) => !existingUserIds.has(r.user_id))
+    .map((r) => ({
+      tournament_id: tournamentId,
+      user_id: r.user_id,
+      entry_status: 'confirmed',
+      registration_id: r.id,
+    }))
+
+  if (newParticipants.length > 0) {
+    const { error: insertErr } = await supabase
+      .from('tournament_participants')
+      .insert(newParticipants)
+
+    if (insertErr) return { error: `Iştirakçılar əlavə edilmədi: ${insertErr.message}` }
+  }
+
+  // Turniri ongoing et
+  const { error: updateErr } = await supabase
+    .from('tournaments')
+    .update({ status: 'ongoing' })
+    .eq('id', tournamentId)
+
+  if (updateErr) return { error: `Turnir statusu yenilənmədi: ${updateErr.message}` }
+
+  revalidatePath('/admin/tournaments')
+  revalidatePath('/tournaments')
+  revalidatePath('/my-matches')
+
+  return { success: `${registrations.length} iştirakçı əlavə edildi. Turnir başladı!` }
+}
