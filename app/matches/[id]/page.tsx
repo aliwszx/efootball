@@ -59,7 +59,7 @@ export default async function MatchDetailPage({ params }: PageProps) {
     redirect('/login')
   }
 
-  const { data: match, error: matchError } = await supabase
+  const { data: leagueMatch, error: leagueMatchError } = await supabase
     .from('league_matches')
     .select(`
       id,
@@ -77,7 +77,30 @@ export default async function MatchDetailPage({ params }: PageProps) {
     .eq('id', id)
     .maybeSingle()
 
-  if (matchError || !match) {
+  const { data: knockoutMatch } = !leagueMatch
+    ? await supabase
+        .from('knockout_matches')
+        .select(`
+          id,
+          tournament_id,
+          stage,
+          leg_no,
+          home_participant_id,
+          away_participant_id,
+          home_score,
+          away_score,
+          winner_participant_id,
+          match_status,
+          scheduled_at,
+          completed_at
+        `)
+        .eq('id', id)
+        .maybeSingle()
+    : { data: null }
+
+  const match = leagueMatch ?? knockoutMatch
+
+  if (!match) {
     notFound()
   }
 
