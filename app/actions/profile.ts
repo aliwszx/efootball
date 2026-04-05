@@ -36,7 +36,7 @@ if (!allowedTypes.includes(avatar.type)) {
   return { error: 'Yalnız JPEG, PNG, WEBP və ya GIF faylı yükləyə bilərsən.' }
 }
   // 5 MB-a qədər qəbul et — sharp sıxışdıracaq
-  const maxSize = 5 * 1024 * 1024
+  const maxSize = 20 * 1024 * 1024
   if (avatar.size > maxSize) {
     return { error: 'Şəkil maksimum 5 MB ola bilər.' }
   }
