@@ -323,7 +323,6 @@ export default function Navbar() {
                     <div className="p-1.5">
                       {[
                         { href: '/profile', label: 'Profil', icon: <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />, extra: <circle cx="12" cy="7" r="4" /> },
-                        { href: '/dashboard', label: 'Dashboard', icon: <rect x="3" y="3" width="7" height="7" />, extra: <><rect x="14" y="3" width="7" height="7" /><rect x="14" y="14" width="7" height="7" /><rect x="3" y="14" width="7" height="7" /></> },
                         { href: '/dashboard/my-tournaments', label: 'Turnirlərim', icon: <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />, extra: <><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" /><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" /><path d="M4 22h16" /><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" /><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" /></> },
                         { href: '/dashboard/payments', label: 'Ödənişlər', icon: <rect x="2" y="5" width="20" height="14" rx="2" />, extra: <line x1="2" y1="10" x2="22" y2="10" /> },
                       ].map(({ href, label, icon, extra }) => (
