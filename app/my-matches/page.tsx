@@ -90,14 +90,26 @@ export default async function MyMatchesPage() {
     )
   }
 
-  const [{ data: homeMatches }, { data: awayMatches }] = await Promise.all([
+  const [
+    { data: homeLeagueMatches },
+    { data: awayLeagueMatches },
+    { data: homeKnockoutMatches },
+    { data: awayKnockoutMatches },
+  ] = await Promise.all([
     supabase.from('league_matches').select('*').in('home_participant_id', participantIds),
     supabase.from('league_matches').select('*').in('away_participant_id', participantIds),
+    supabase.from('knockout_matches').select('*').in('home_participant_id', participantIds),
+    supabase.from('knockout_matches').select('*').in('away_participant_id', participantIds),
   ])
 
   const mergedMap = new Map<string, any>()
 
-  for (const match of [...(homeMatches || []), ...(awayMatches || [])]) {
+  for (const match of [
+    ...(homeLeagueMatches || []),
+    ...(awayLeagueMatches || []),
+    ...(homeKnockoutMatches || []).map((m: any) => ({ ...m, _type: 'knockout' })),
+    ...(awayKnockoutMatches || []).map((m: any) => ({ ...m, _type: 'knockout' })),
+  ]) {
     mergedMap.set(match.id, match)
   }
 
@@ -187,7 +199,11 @@ export default async function MyMatchesPage() {
         matchId: match.id,
         tournamentTitle: tournament?.title || 'Turnir',
         tournamentSlug: tournament?.slug || '',
-        roundNo: match.round_no,
+        roundNo: match.round_no
+          ? `Round ${match.round_no}`
+          : match.stage
+          ? `${{ quarterfinal: "Çərək Final", semifinal: "Yarımfinal", final: "Final", round_of_16: "1/8 Final" }[match.stage as string] ?? match.stage}${match.leg_no ? ` — Leg ${match.leg_no}` : ""}`
+          : "—",
         opponentName: opponentProfile?.full_name || opponentProfile?.username || 'User',
         isHome,
         matchStatus: match.match_status,
@@ -267,7 +283,7 @@ export default async function MyMatchesPage() {
                     <p className="text-sm uppercase tracking-wide text-[#ff4d6d]">
                       {item.tournamentTitle}
                     </p>
-                    <h2 className="mt-1 text-2xl font-bold">Round {item.roundNo}</h2>
+                    <h2 className="mt-1 text-2xl font-bold">{item.roundNo}</h2>
                   </div>
 
                   <span
