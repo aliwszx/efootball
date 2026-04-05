@@ -390,6 +390,72 @@ export async function recalculateLeagueStandings(tournamentId: string) {
   revalidatePath('/leaderboard')
 }
 
+async function resolveKnockoutTie(supabase: any, matchId: string, tournamentId: string) {
+  // Find the tie this match belongs to
+  const { data: km } = await supabase
+    .from('knockout_matches')
+    .select('tie_id, stage')
+    .eq('id', matchId)
+    .maybeSingle()
+
+  if (!km?.tie_id) return
+
+  // Get all matches for this tie
+  const { data: tieMatches } = await supabase
+    .from('knockout_matches')
+    .select('id, leg_no, home_participant_id, away_participant_id, home_score, away_score, match_status, winner_participant_id')
+    .eq('tie_id', km.tie_id)
+
+  if (!tieMatches) return
+
+  const allCompleted = tieMatches.every((m: any) => m.match_status === 'completed')
+  if (!allCompleted) {
+    // Not all legs done yet — update tie to ongoing
+    await supabase.from('knockout_ties').update({ tie_status: 'ongoing' }).eq('id', km.tie_id)
+    return
+  }
+
+  // Calculate aggregate scores
+  // leg1: home=A, away=B | leg2: home=B, away=A
+  const sorted = [...tieMatches].sort((a: any, b: any) => (a.leg_no ?? 1) - (b.leg_no ?? 1))
+  const leg1 = sorted[0]
+  const leg2 = sorted[1] ?? null
+
+  const aggA = (leg1?.home_score ?? 0) + (leg2?.away_score ?? 0)
+  const aggB = (leg1?.away_score ?? 0) + (leg2?.home_score ?? 0)
+
+  const participantA = leg1?.home_participant_id
+  const participantB = leg1?.away_participant_id
+
+  let winnerParticipantId: string | null = null
+
+  if (aggA > aggB) {
+    winnerParticipantId = participantA
+  } else if (aggB > aggA) {
+    winnerParticipantId = participantB
+  } else {
+    // Draw on aggregate — use away goals rule (B scored more away = leg1.away_score vs leg2.away_score)
+    // leg1 away score = B's away goals; leg2 away score = A's away goals
+    const awayGoalsA = leg2?.away_score ?? 0
+    const awayGoalsB = leg1?.away_score ?? 0
+    if (awayGoalsA > awayGoalsB) {
+      winnerParticipantId = participantA
+    } else if (awayGoalsB > awayGoalsA) {
+      winnerParticipantId = participantB
+    } else {
+      // Still tied — pick first as winner (admin can override via dispute)
+      winnerParticipantId = participantA
+    }
+  }
+
+  await supabase.from('knockout_ties').update({
+    tie_status: 'completed',
+    winner_participant_id: winnerParticipantId,
+    agg_a: aggA,
+    agg_b: aggB,
+  }).eq('id', km.tie_id)
+}
+
 async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string, matchTable: string = 'league_matches') {
   const { data: match, error: matchError } = await supabase
     .from(matchTable)
@@ -524,7 +590,12 @@ async function resolveLeagueMatchFromSubmissions(supabase: any, matchId: string,
       throw new Error(submissionUpdateError.message)
     }
 
-    await recalculateLeagueStandings(match.tournament_id)
+    // If this is a knockout match, try to resolve the tie
+    if (matchTable === 'knockout_matches') {
+      await resolveKnockoutTie(supabase, matchId, match.tournament_id)
+    } else {
+      await recalculateLeagueStandings(match.tournament_id)
+    }
     return
   }
 
@@ -807,6 +878,11 @@ export async function adminResolveLeagueDispute(
 
   if (submissionsUpdateError) {
     return { error: submissionsUpdateError.message }
+  }
+
+  // If knockout match — update the tie
+  if (resolveTable === 'knockout_matches') {
+    await resolveKnockoutTie(supabase, match.id, match.tournament_id)
   }
 
   const { error: reviewLogError } = await supabase.from('match_review_logs').insert({
