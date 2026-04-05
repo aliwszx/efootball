@@ -48,12 +48,13 @@ if (!allowedTypes.includes(avatar.type)) {
   let resizedBuffer: Buffer
   try {
     resizedBuffer = await sharp(inputBuffer)
-      .resize(300, 300, {
-        fit: 'cover',       // mərkəzdən kəsir, nisbəti qoruyur
-        position: 'center',
-      })
-      .webp({ quality: 80 }) // WebP, keyfiyyət 80% — ~30-80 KB
-      .toBuffer()
+  .rotate()              // EXIF orientation-a görə avtomatik düzəldir
+  .resize(300, 300, {
+    fit: 'cover',
+    position: 'center',
+  })
+  .webp({ quality: 80 })
+  .toBuffer()
   } catch {
     return { error: 'Şəkil emal edilərkən xəta baş verdi.' }
   }
