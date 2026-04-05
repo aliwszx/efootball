@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { setFeaturedTournament, startTournament } from '@/app/actions/tournaments'
+import { setFeaturedTournament } from '@/app/actions/tournaments'
+import StartTournamentButton from './start-tournament-button'
 
 export default async function AdminTournamentsPage() {
   const supabase = await createClient()
@@ -76,18 +77,11 @@ export default async function AdminTournamentsPage() {
                   Bax
                 </Link>
                 {(t.status === 'open' || t.status === 'draft') && (
-                  <form action={startTournament}>
-                    <input type="hidden" name="tournament_id" value={t.id} />
-                    <button
-                      className="rounded-xl border border-emerald-500/25 bg-emerald-500/10 px-4 py-2 text-sm font-medium text-emerald-400 transition hover:border-emerald-500/40 hover:bg-emerald-500/15 hover:text-emerald-300"
-                    >
-                      ▶ Başlat
-                    </button>
-                  </form>
+                  <StartTournamentButton tournamentId={t.id} />
                 )}
 
                 {t.status === 'ongoing' && (
-                  <span className="rounded-xl border border-emerald-500/20 bg-emerald-500/8 px-4 py-2 text-sm font-medium text-emerald-500 cursor-default">
+                  <span className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-2 text-sm font-medium text-emerald-500 cursor-default">
                     ● Davam edir
                   </span>
                 )}
