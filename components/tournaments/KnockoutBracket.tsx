@@ -11,6 +11,7 @@ type Participant = {
 
 type KnockoutMatch = {
   id: string
+  tie_id?: string
   stage: 'playoff' | 'round_of_16' | 'quarterfinal' | 'semifinal' | 'final'
   leg_no: number
   home_score: number | null
@@ -41,44 +42,92 @@ function stageTitle(stage: KnockoutMatch['stage']) {
   return stage
 }
 
-function MatchCard({ match }: { match: KnockoutMatch }) {
-  const homeName = getPlayerName(match.home_participant)
-  const awayName = getPlayerName(match.away_participant)
+function statusLabel(status: string) {
+  switch (status) {
+    case 'scheduled': return { text: 'Gözlənilir', cls: 'text-zinc-400' }
+    case 'awaiting_confirmation': return { text: 'Təsdiq gözləyir', cls: 'text-yellow-400' }
+    case 'disputed': return { text: 'Mübahisəli', cls: 'text-red-400' }
+    case 'completed': return { text: 'Tamamlandı', cls: 'text-emerald-400' }
+    default: return { text: status, cls: 'text-zinc-400' }
+  }
+}
 
-  const homeWinner = match.winner_participant_id === match.home_participant_id
-  const awayWinner = match.winner_participant_id === match.away_participant_id
+function groupByTie(matches: KnockoutMatch[]): KnockoutMatch[][] {
+  const tieMap = new Map<string, KnockoutMatch[]>()
+  for (const m of matches) {
+    const key = m.tie_id ?? m.id
+    if (!tieMap.has(key)) tieMap.set(key, [])
+    tieMap.get(key)!.push(m)
+  }
+  return Array.from(tieMap.values())
+}
+
+function TieCard({ legs }: { legs: KnockoutMatch[] }) {
+  const sorted = [...legs].sort((a, b) => (a.leg_no ?? 1) - (b.leg_no ?? 1))
+  const leg1 = sorted[0]
+  const leg2 = sorted[1]
+
+  const homeName = getPlayerName(leg1?.home_participant)
+  const awayName = getPlayerName(leg1?.away_participant)
+
+  // homeAgg = leg1.home_score + leg2.away_score (leg2 home is original away player)
+  const l1h = leg1?.home_score
+  const l1a = leg1?.away_score
+  const l2h = leg2?.home_score
+  const l2a = leg2?.away_score
+
+  const homeAgg = l1h !== null && l1h !== undefined && l2a !== null && l2a !== undefined
+    ? l1h + l2a : null
+  const awayAgg = l1a !== null && l1a !== undefined && l2h !== null && l2h !== undefined
+    ? l1a + l2h : null
+
+  const winner = leg2?.winner_participant_id ?? leg1?.winner_participant_id
+  const homeWinner = !!winner && winner === leg1?.home_participant_id
+  const awayWinner = !!winner && winner === leg1?.away_participant_id
+
+  const allCompleted = sorted.every(l => l.match_status === 'completed')
+  const anyDisputed = sorted.some(l => l.match_status === 'disputed')
+  const tieStatus = anyDisputed ? 'disputed' : allCompleted ? 'completed' : 'scheduled'
+  const sl = statusLabel(tieStatus)
 
   return (
     <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-sm backdrop-blur">
-      <div className="mb-2 text-xs text-white/50">
-        Matç #{match.leg_no || 1}
+      <div className="mb-2 flex items-center justify-between">
+        <span className="text-xs text-white/50">{stageTitle(leg1?.stage)}</span>
+        <span className={`text-xs ${sl.cls}`}>{sl.text}</span>
       </div>
 
       <div className={`flex items-center justify-between rounded-xl px-3 py-2 ${homeWinner ? 'bg-emerald-500/15 border border-emerald-400/30' : 'bg-white/5'}`}>
-        <span className="truncate pr-3">{homeName}</span>
-        <span className="font-semibold">
-          {match.home_score ?? '-'}
-        </span>
+        <span className="truncate pr-3 text-sm">{homeName}</span>
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          {leg2 && (
+            <span className="text-xs text-white/40 font-normal">
+              ({l1h ?? '-'} + {l2a ?? '-'})
+            </span>
+          )}
+          <span>{homeAgg ?? (l1h ?? '-')}</span>
+        </div>
       </div>
 
       <div className={`mt-2 flex items-center justify-between rounded-xl px-3 py-2 ${awayWinner ? 'bg-emerald-500/15 border border-emerald-400/30' : 'bg-white/5'}`}>
-        <span className="truncate pr-3">{awayName}</span>
-        <span className="font-semibold">
-          {match.away_score ?? '-'}
-        </span>
-      </div>
-
-      <div className="mt-2 text-[11px] text-white/45">
-        Status: {match.match_status}
+        <span className="truncate pr-3 text-sm">{awayName}</span>
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          {leg2 && (
+            <span className="text-xs text-white/40 font-normal">
+              ({l1a ?? '-'} + {l2h ?? '-'})
+            </span>
+          )}
+          <span>{awayAgg ?? (l1a ?? '-')}</span>
+        </div>
       </div>
     </div>
   )
 }
 
 export default function KnockoutBracket({ matches }: Props) {
-  const quarterfinals = matches.filter((m) => m.stage === 'quarterfinal')
-  const semifinals = matches.filter((m) => m.stage === 'semifinal')
-  const finals = matches.filter((m) => m.stage === 'final')
+  const quarterfinalTies = groupByTie(matches.filter((m) => m.stage === 'quarterfinal'))
+  const semifinalTies = groupByTie(matches.filter((m) => m.stage === 'semifinal'))
+  const finalTies = groupByTie(matches.filter((m) => m.stage === 'final'))
 
   return (
     <div className="rounded-[28px] border border-white/10 bg-white/[0.04] p-5 md:p-6">
@@ -95,9 +144,9 @@ export default function KnockoutBracket({ matches }: Props) {
             {stageTitle('quarterfinal')}
           </h3>
           <div className="space-y-4">
-            {quarterfinals.length > 0 ? (
-              quarterfinals.map((match) => (
-                <MatchCard key={match.id} match={match} />
+            {quarterfinalTies.length > 0 ? (
+              quarterfinalTies.map((legs) => (
+                <TieCard key={legs[0].tie_id ?? legs[0].id} legs={legs} />
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm text-white/50">
@@ -112,9 +161,9 @@ export default function KnockoutBracket({ matches }: Props) {
             {stageTitle('semifinal')}
           </h3>
           <div className="space-y-4">
-            {semifinals.length > 0 ? (
-              semifinals.map((match) => (
-                <MatchCard key={match.id} match={match} />
+            {semifinalTies.length > 0 ? (
+              semifinalTies.map((legs) => (
+                <TieCard key={legs[0].tie_id ?? legs[0].id} legs={legs} />
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm text-white/50">
@@ -129,9 +178,9 @@ export default function KnockoutBracket({ matches }: Props) {
             {stageTitle('final')}
           </h3>
           <div className="space-y-4">
-            {finals.length > 0 ? (
-              finals.map((match) => (
-                <MatchCard key={match.id} match={match} />
+            {finalTies.length > 0 ? (
+              finalTies.map((legs) => (
+                <TieCard key={legs[0].tie_id ?? legs[0].id} legs={legs} />
               ))
             ) : (
               <div className="rounded-2xl border border-dashed border-white/10 bg-white/[0.03] p-4 text-sm text-white/50">
