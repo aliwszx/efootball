@@ -201,7 +201,11 @@ export default async function MatchDetailPage({ params }: PageProps) {
               <p className="mb-2 text-sm uppercase tracking-[0.2em] text-[#ff4d6d]">
                 {tournament?.title || 'Turnir'}
               </p>
-              <h1 className="text-3xl font-bold sm:text-5xl">League • Round {match.round_no}</h1>
+              <h1 className="text-3xl font-bold sm:text-5xl">{
+                (match as any).round_no
+                  ? `League • Round ${(match as any).round_no}`
+                  : { quarterfinal: 'Çərək Final', semifinal: 'Yarımfinal', final: 'Final', round_of_16: '1/8 Final' }[(match as any).stage as string] ?? (match as any).stage
+              }</h1>
             </div>
 
             <span
@@ -251,8 +255,8 @@ export default async function MatchDetailPage({ params }: PageProps) {
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
-              <p className="text-sm text-zinc-400">Round</p>
-              <p className="mt-1 font-semibold">{match.round_no}</p>
+              <p className="text-sm text-zinc-400">Mərhələ</p>
+              <p className="mt-1 font-semibold">{(match as any).round_no ? `Round ${(match as any).round_no}` : ({ quarterfinal: 'Çərək Final', semifinal: 'Yarımfinal', final: 'Final', round_of_16: '1/8 Final' } as any)[(match as any).stage] ?? (match as any).stage}</p>
             </div>
 
             <div className="rounded-2xl border border-white/10 bg-black/20 p-4">
