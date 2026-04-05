@@ -75,6 +75,10 @@ export default async function AdminTournamentsPage() {
                   className="rounded-xl border border-[#C50337]/15 bg-[#C50337]/8 px-4 py-2 text-sm text-zinc-300 transition hover:border-[#C50337]/25 hover:text-white">
                   Bax
                 </Link>
+                <Link href={`/admin/tournaments/${t.id}/edit`}
+                  className="rounded-xl border border-zinc-600/30 bg-zinc-600/10 px-4 py-2 text-sm text-zinc-300 transition hover:border-zinc-500/40 hover:bg-zinc-600/20 hover:text-white">
+                  Düzəliş et
+                </Link>
                 <form action={setFeaturedTournament}>
                   <input type="hidden" name="tournament_id" value={t.id} />
                   <button
