@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { setFeaturedTournament } from '@/app/actions/tournaments'
 import StartTournamentButton from './start-tournament-button'
+import EndTournamentButton from './end-tournament-button'
 
 export default async function AdminTournamentsPage() {
   const supabase = await createClient()
@@ -76,14 +77,17 @@ export default async function AdminTournamentsPage() {
                   className="rounded-xl border border-[#C50337]/15 bg-[#C50337]/8 px-4 py-2 text-sm text-zinc-300 transition hover:border-[#C50337]/25 hover:text-white">
                   Bax
                 </Link>
+                <Link href={`/admin/tournaments/${t.id}/edit`}
+                  className="rounded-xl border border-zinc-600/30 bg-zinc-600/10 px-4 py-2 text-sm text-zinc-300 transition hover:border-zinc-500/40 hover:bg-zinc-600/20 hover:text-white">
+                  Düzəliş et
+                </Link>
+
                 {(t.status === 'open' || t.status === 'draft') && (
                   <StartTournamentButton tournamentId={t.id} />
                 )}
 
                 {t.status === 'ongoing' && (
-                  <span className="rounded-xl border border-emerald-500/20 bg-emerald-500/[0.08] px-4 py-2 text-sm font-medium text-emerald-500 cursor-default">
-                    ● Davam edir
-                  </span>
+                  <EndTournamentButton tournamentId={t.id} />
                 )}
 
                 <form action={setFeaturedTournament}>
