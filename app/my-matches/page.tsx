@@ -24,11 +24,11 @@ function statusClass(status: string) {
     case 'disputed':
       return 'border-red-400/20 bg-red-500/10 text-red-200'
     case 'completed':
-      return 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
+      return 'border-[#C50337]/20 bg-[#C50337]/10 text-[#ff6b81]'
     case 'cancelled':
       return 'border-zinc-400/20 bg-zinc-500/10 text-zinc-200'
     default:
-      return 'border-cyan-400/20 bg-cyan-500/10 text-cyan-200'
+      return 'border-[#C50337]/20 bg-[#C50337]/10 text-[#ff6b81]'
   }
 }
 
@@ -67,7 +67,7 @@ export default async function MyMatchesPage() {
       <main className="min-h-screen px-4 py-10 text-white">
         <div className="mx-auto max-w-6xl">
           <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl sm:p-8">
-            <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">Matches</p>
+            <p className="mb-2 text-sm uppercase tracking-[0.2em] text-[#ff4d6d]">Matches</p>
             <h1 className="text-3xl font-bold sm:text-5xl">Mənim matçlarım</h1>
             <p className="mt-4 text-zinc-400">
               Aktiv, mübahisəli və tamamlanmış matçlarını buradan izləyə bilərsən.
@@ -222,7 +222,7 @@ export default async function MyMatchesPage() {
     <main className="min-h-screen px-4 py-10 text-white">
       <div className="mx-auto max-w-6xl">
         <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl sm:p-8">
-          <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">Matches</p>
+          <p className="mb-2 text-sm uppercase tracking-[0.2em] text-[#ff4d6d]">Matches</p>
           <h1 className="text-3xl font-bold sm:text-5xl">Mənim matçlarım</h1>
           <p className="mt-4 text-zinc-400">
             Aktiv, mübahisəli və tamamlanmış matçlarını buradan idarə et.
@@ -264,7 +264,7 @@ export default async function MyMatchesPage() {
               >
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                   <div>
-                    <p className="text-sm uppercase tracking-wide text-cyan-300">
+                    <p className="text-sm uppercase tracking-wide text-[#ff4d6d]">
                       {item.tournamentTitle}
                     </p>
                     <h2 className="mt-1 text-2xl font-bold">Round {item.roundNo}</h2>
@@ -310,7 +310,7 @@ export default async function MyMatchesPage() {
 
                   <Link
                     href={`/matches/${item.matchId}`}
-                    className="inline-flex rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 px-5 py-3 text-sm font-semibold text-black transition hover:scale-[1.01]"
+                    className="inline-flex rounded-2xl bg-gradient-to-r from-[#C50337] to-[#8B0224] px-5 py-3 text-sm font-semibold text-white transition hover:scale-[1.01]"
                   >
                     Matçı aç
                   </Link>

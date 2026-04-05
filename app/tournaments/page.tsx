@@ -48,7 +48,7 @@ export default async function TournamentsPage() {
           <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
             <div>
               <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-[#ff4d6d]">Turnirlər</p>
-              <h1 className="text-4xl font-bold sm:text-6xl" style={{ fontFamily: 'var(--font-syne)' }}>
+              <h1 className="text-4xl font-bold sm:text-6xl" style={{ fontFamily: 'var(--font-poppins)' }}>
                 Aktiv turnirlər
               </h1>
               <p className="mt-3 text-sm text-zinc-400">
@@ -82,7 +82,7 @@ export default async function TournamentsPage() {
                   className="group relative flex flex-col overflow-hidden rounded-[24px] border border-[#C50337]/10 bg-[#C50337]/4 p-6 backdrop-blur-xl transition-all duration-200 hover:border-[#C50337]/20 hover:bg-[#C50337]/8">
 
                   <div className="mb-4 flex items-start justify-between gap-3">
-                    <h2 className="text-xl font-bold leading-snug text-white" style={{ fontFamily: 'var(--font-syne)' }}>
+                    <h2 className="text-xl font-bold leading-snug text-white" style={{ fontFamily: 'var(--font-poppins)' }}>
                       {title}
                     </h2>
                     <span className={`flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide ${statusStyle}`}>

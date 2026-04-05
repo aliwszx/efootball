@@ -37,7 +37,7 @@ export default async function ProfilePage() {
         <section className="rounded-2xl border border-white/[0.08] bg-white/[0.03] p-6 sm:p-8">
           <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
             <div>
-              <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#00e5a0]">
+              <p className="mb-2 text-xs uppercase tracking-[0.2em] text-[#ff4d6d]">
                 Hesab
               </p>
               <h1 className="text-3xl font-bold sm:text-4xl">Profilim</h1>
@@ -47,11 +47,11 @@ export default async function ProfilePage() {
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[#00e5a0]/30 bg-[#0b1120]">
+              <div className="h-16 w-16 overflow-hidden rounded-full border-2 border-[#C50337]/25 bg-[#02060E]">
                 {avatarUrl ? (
                   <img src={avatarUrl} alt="Profil" className="h-full w-full object-cover" />
                 ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xl font-bold text-[#00e5a0]">
+                  <div className="flex h-full w-full items-center justify-center text-xl font-bold text-[#ff4d6d]">
                     {(username || user.email || 'U').charAt(0).toUpperCase()}
                   </div>
                 )}

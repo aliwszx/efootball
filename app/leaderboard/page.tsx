@@ -50,7 +50,7 @@ export default async function LeaderboardPage() {
         <section className="relative overflow-hidden rounded-[28px] border border-[#C50337]/15 bg-[#C50337]/5 p-7 backdrop-blur-xl sm:p-10">
           <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#C50337]/8 via-transparent to-[#8B0224]/5" />
           <p className="mb-2 text-xs font-semibold uppercase tracking-[0.25em] text-[#ff4d6d]">Ranking</p>
-          <h1 className="text-4xl font-bold sm:text-6xl" style={{ fontFamily: 'var(--font-syne)' }}>
+          <h1 className="text-4xl font-bold sm:text-6xl" style={{ fontFamily: 'var(--font-poppins)' }}>
             Ümumi Leaderboard
           </h1>
           <p className="mt-4 max-w-xl text-sm leading-relaxed text-zinc-400">
@@ -105,7 +105,7 @@ export default async function LeaderboardPage() {
                           )}
                         </div>
                         <div className="min-w-0">
-                          <p className="truncate font-semibold text-white" style={{ fontFamily: 'var(--font-syne)' }}>
+                          <p className="truncate font-semibold text-white" style={{ fontFamily: 'var(--font-poppins)' }}>
                             {displayName}
                           </p>
                           <p className="truncate text-xs text-zinc-500">@{username}</p>

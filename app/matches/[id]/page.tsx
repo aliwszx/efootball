@@ -28,11 +28,11 @@ function matchStatusClass(status: string) {
     case 'disputed':
       return 'border-red-400/20 bg-red-500/10 text-red-200'
     case 'completed':
-      return 'border-emerald-400/20 bg-emerald-500/10 text-emerald-200'
+      return 'border-[#C50337]/20 bg-[#C50337]/10 text-[#ff6b81]'
     case 'cancelled':
       return 'border-zinc-400/20 bg-zinc-500/10 text-zinc-200'
     default:
-      return 'border-cyan-400/20 bg-cyan-500/10 text-cyan-200'
+      return 'border-[#C50337]/20 bg-[#C50337]/10 text-[#ff6b81]'
   }
 }
 
@@ -175,7 +175,7 @@ export default async function MatchDetailPage({ params }: PageProps) {
         <section className="rounded-[32px] border border-white/10 bg-white/5 p-6 backdrop-blur-xl sm:p-8">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
-              <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">
+              <p className="mb-2 text-sm uppercase tracking-[0.2em] text-[#ff4d6d]">
                 {tournament?.title || 'Turnir'}
               </p>
               <h1 className="text-3xl font-bold sm:text-5xl">League • Round {match.round_no}</h1>
@@ -196,7 +196,7 @@ export default async function MatchDetailPage({ params }: PageProps) {
               <p className="mt-2 text-2xl font-bold">
                 {homeProfile?.full_name || homeProfile?.username || 'User'}
               </p>
-              {isHome && <p className="mt-2 text-sm text-cyan-300">Sən</p>}
+              {isHome && <p className="mt-2 text-sm text-[#ff4d6d]">Sən</p>}
             </div>
 
             <div className="text-center">
@@ -217,7 +217,7 @@ export default async function MatchDetailPage({ params }: PageProps) {
               <p className="mt-2 text-2xl font-bold">
                 {awayProfile?.full_name || awayProfile?.username || 'User'}
               </p>
-              {!isHome && <p className="mt-2 text-sm text-cyan-300">Sən</p>}
+              {!isHome && <p className="mt-2 text-sm text-[#ff4d6d]">Sən</p>}
             </div>
           </div>
 
@@ -249,7 +249,7 @@ export default async function MatchDetailPage({ params }: PageProps) {
         </div>
 
         {isCompleted && (
-          <div className="mt-6 rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-emerald-200">
+          <div className="mt-6 rounded-2xl border border-[#C50337]/20 bg-[#C50337]/10 p-4 text-[#ff6b81]">
             Bu matç tamamlanıb.
           </div>
         )}
@@ -267,7 +267,7 @@ export default async function MatchDetailPage({ params }: PageProps) {
         )}
 
         {!isCompleted && !isDisputed && !mySubmission && opponentSubmission && (
-          <div className="mt-6 rounded-2xl border border-cyan-400/20 bg-cyan-500/10 p-4 text-cyan-200">
+          <div className="mt-6 rounded-2xl border border-[#C50337]/20 bg-[#C50337]/10 p-4 text-[#ff6b81]">
             Rəqib artıq nəticə göndərib. Eyni nəticəni göndərərək təsdiqləyə və ya fərqli nəticə
             ilə etiraz edə bilərsən.
           </div>

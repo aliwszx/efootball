@@ -70,11 +70,11 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-6xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
         <Link href="/" className="group flex shrink-0 items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#C50337] to-[#8B0224] shadow-lg shadow-[#C50337]/25 transition-shadow group-hover:shadow-[#C50337]/40">
-            <span className="text-lg font-bold text-white" style={{ fontFamily: 'var(--font-syne)' }}>E</span>
+            <span className="text-lg font-bold text-white" style={{ fontFamily: 'var(--font-poppins)' }}>E</span>
           </div>
           <div className="hidden sm:block">
             <p className="text-[10px] uppercase tracking-[0.22em] text-zinc-500">Platform</p>
-            <p className="text-[15px] font-bold leading-tight text-white" style={{ fontFamily: 'var(--font-syne)' }}>eFootball</p>
+            <p className="text-[15px] font-bold leading-tight text-white" style={{ fontFamily: 'var(--font-poppins)' }}>eFootball</p>
           </div>
         </Link>
 

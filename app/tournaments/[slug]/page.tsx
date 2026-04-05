@@ -75,13 +75,13 @@ export default async function TournamentDetailPage({
       <div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr] lg:gap-8">
         <div className="rounded-[24px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl sm:rounded-[32px] sm:p-8">
           <div className="mb-6 flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="rounded-full border border-cyan-400/20 bg-cyan-400/10 px-4 py-1 text-sm text-cyan-300">
+            <span className="rounded-full border border-[#C50337]/20 bg-[#C50337]/10 px-4 py-1 text-sm text-[#ff4d6d]">
               {tournament.platform}
             </span>
             <span className="rounded-full border border-white/10 bg-white/5 px-4 py-1 text-sm text-zinc-300">
               {tournament.format}
             </span>
-            <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-4 py-1 text-sm text-emerald-300">
+            <span className="rounded-full border border-[#C50337]/20 bg-[#C50337]/10 px-4 py-1 text-sm text-[#ff4d6d]">
               {tournament.status}
             </span>
           </div>
@@ -132,7 +132,7 @@ export default async function TournamentDetailPage({
         key={player.id}
         className="flex items-center gap-3 rounded-xl border border-white/10 bg-white/5 px-4 py-2"
       >
-        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-cyan-500/20 text-xs font-bold text-cyan-300">
+        <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#C50337]/10 text-xs font-bold text-[#ff4d6d]">
           {index + 1}
         </div>
 
@@ -185,7 +185,7 @@ export default async function TournamentDetailPage({
             )}
 
             {user && alreadyJoined && (
-              <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-emerald-200">
+              <div className="rounded-2xl border border-[#C50337]/20 bg-[#C50337]/10 p-4 text-[#ff6b81]">
                 Sən artıq bu turnirə qoşulmusan.
               </div>
             )}
@@ -215,7 +215,7 @@ export default async function TournamentDetailPage({
               <input type="hidden" name="tournament_slug" value={tournament.slug} />
               <button
                 type="submit"
-                className="w-full rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 py-4 text-base font-semibold text-black transition hover:scale-[1.01] sm:text-lg"
+                className="w-full rounded-2xl bg-gradient-to-r from-[#C50337] to-[#8B0224] px-5 py-4 text-base font-semibold text-white transition hover:scale-[1.01] sm:text-lg"
               >
                 Turnirə qoşul
               </button>

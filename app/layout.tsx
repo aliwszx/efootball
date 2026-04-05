@@ -1,18 +1,24 @@
 import type { Metadata } from 'next'
 import './globals.css'
 import Navbar from '@/components/Navbar'
-import { Syne, DM_Sans } from 'next/font/google'
+import { Poppins, Inter, Open_Sans } from 'next/font/google'
 
-const syne = Syne({
+const poppins = Poppins({
   subsets: ['latin'],
   weight: ['400', '500', '600', '700', '800'],
-  variable: '--font-syne',
+  variable: '--font-poppins',
 })
 
-const dmSans = DM_Sans({
+const inter = Inter({
   subsets: ['latin'],
   weight: ['300', '400', '500', '600'],
-  variable: '--font-dm-sans',
+  variable: '--font-inter',
+})
+
+const openSans = Open_Sans({
+  subsets: ['latin'],
+  weight: ['400', '600'],
+  variable: '--font-open-sans',
 })
 
 export const metadata: Metadata = {
@@ -25,7 +31,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="az">
-      <body className={`${syne.variable} ${dmSans.variable} min-h-screen bg-[#02060E] text-white antialiased font-sans`}>
+      <body className={`${poppins.variable} ${inter.variable} ${openSans.variable} min-h-screen bg-[#02060E] text-white antialiased font-inter`}>
         <div className="relative min-h-screen overflow-x-hidden">
 
           {/* Arxa fon qradientləri — Crimson Noir */}

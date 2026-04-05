@@ -80,7 +80,7 @@ export default function SubmissionForm({ matchId }: SubmissionFormProps) {
       )}
 
       {state?.success && (
-        <div className="rounded-2xl border border-emerald-400/20 bg-emerald-500/10 p-4 text-emerald-200">
+        <div className="rounded-2xl border border-[#C50337]/20 bg-[#C50337]/10 p-4 text-[#ff6b81]">
           {state.success}
         </div>
       )}
@@ -88,7 +88,7 @@ export default function SubmissionForm({ matchId }: SubmissionFormProps) {
       <button
         type="submit"
         disabled={pending}
-        className="rounded-2xl bg-gradient-to-r from-emerald-400 to-cyan-400 px-5 py-3 font-semibold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
+        className="rounded-2xl bg-gradient-to-r from-[#C50337] to-[#8B0224] px-5 py-3 font-semibold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
       >
         {pending ? 'Göndərilir...' : 'Nəticəni göndər'}
       </button>

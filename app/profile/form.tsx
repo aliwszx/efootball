@@ -38,11 +38,11 @@ export default function ProfileForm({
           <h2 className="text-lg font-semibold text-white">Profil şəkli</h2>
 
           <div className="mt-5 flex items-center gap-5">
-            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-[#00e5a0]/30 bg-[#0b1120]">
+            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-full border-2 border-[#C50337]/30 bg-[#02060E]">
               {avatarUrl ? (
                 <img src={avatarUrl} alt="Profil" className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-[#00e5a0]">
+                <div className="flex h-full w-full items-center justify-center text-2xl font-bold text-[#C50337]">
                   {avatarLetter}
                 </div>
               )}
@@ -63,9 +63,9 @@ export default function ProfileForm({
                 type="file"
                 name="avatar"
                 accept="image/*"
-                className="block w-full rounded-xl border border-white/10 bg-[#080e1a] px-4 py-3 text-sm text-white
-                  file:mr-4 file:rounded-lg file:border-0 file:bg-[#00e5a0] file:px-4 file:py-1.5
-                  file:text-sm file:font-semibold file:text-black hover:file:opacity-90"
+                className="block w-full rounded-xl border border-white/10 bg-[#02060E] px-4 py-3 text-sm text-white
+                  file:mr-4 file:rounded-lg file:border-0 file:bg-[#C50337]/90 file:px-4 file:py-1.5
+                  file:text-sm file:font-semibold file:text-white hover:file:opacity-90"
               />
               <p className="mt-1.5 text-xs text-zinc-600">PNG, JPG, WEBP — maks. 3 MB</p>
             </div>
@@ -76,7 +76,7 @@ export default function ProfileForm({
               </div>
             )}
             {avatarState.success && (
-              <div className="rounded-xl border border-[#00e5a0]/20 bg-[#00e5a0]/10 px-4 py-3 text-sm text-[#00e5a0]">
+              <div className="rounded-xl border border-[#C50337]/20 bg-[#C50337]/10 px-4 py-3 text-sm text-[#C50337]">
                 {avatarState.success}
               </div>
             )}
@@ -84,7 +84,7 @@ export default function ProfileForm({
             <button
               type="submit"
               disabled={avatarPending}
-              className="w-full rounded-xl bg-[#00e5a0] px-5 py-3 text-sm font-bold text-black transition
+              className="w-full rounded-xl bg-[#C50337] px-5 py-3 text-sm font-bold text-white transition
                 hover:bg-[#00cc8e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {avatarPending ? 'Yüklənir...' : 'Şəkli yenilə'}
@@ -96,7 +96,7 @@ export default function ProfileForm({
         <div className="rounded-2xl border border-white/10 bg-[#0d1424] p-6">
           <h2 className="text-lg font-semibold text-white">Username dəyiş</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            Cari: <span className="font-medium text-[#00e5a0]">@{currentUsername || '—'}</span>
+            Cari: <span className="font-medium text-[#C50337]">@{currentUsername || '—'}</span>
           </p>
 
           <form action={usernameFormAction} className="mt-5 space-y-4">
@@ -104,7 +104,7 @@ export default function ProfileForm({
               <label className="mb-2 block text-sm text-zinc-400">
                 Yeni username
               </label>
-              <div className="flex items-center rounded-xl border border-white/10 bg-[#080e1a] px-4 py-3 focus-within:border-[#00e5a0]/40 transition">
+              <div className="flex items-center rounded-xl border border-white/10 bg-[#02060E] px-4 py-3 focus-within:border-[#C50337]/40 transition">
                 <span className="mr-1 text-sm text-zinc-500">@</span>
                 <input
                   type="text"
@@ -126,7 +126,7 @@ export default function ProfileForm({
               </div>
             )}
             {usernameState.success && (
-              <div className="rounded-xl border border-[#00e5a0]/20 bg-[#00e5a0]/10 px-4 py-3 text-sm text-[#00e5a0]">
+              <div className="rounded-xl border border-[#C50337]/20 bg-[#C50337]/10 px-4 py-3 text-sm text-[#C50337]">
                 {usernameState.success}
               </div>
             )}
@@ -134,7 +134,7 @@ export default function ProfileForm({
             <button
               type="submit"
               disabled={usernamePending}
-              className="w-full rounded-xl bg-[#00e5a0] px-5 py-3 text-sm font-bold text-black transition
+              className="w-full rounded-xl bg-[#C50337] px-5 py-3 text-sm font-bold text-white transition
                 hover:bg-[#00cc8e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {usernamePending ? 'Saxlanılır...' : 'Usernamei yenilə'}
@@ -160,8 +160,8 @@ export default function ProfileForm({
                 defaultValue={fullName}
                 placeholder="Adınız Soyadınız"
                 autoComplete="off"
-                className="w-full rounded-xl border border-white/10 bg-[#080e1a] px-4 py-3 text-sm text-white
-                  placeholder-zinc-600 outline-none focus:border-[#00e5a0]/40 transition"
+                className="w-full rounded-xl border border-white/10 bg-[#02060E] px-4 py-3 text-sm text-white
+                  placeholder-zinc-600 outline-none focus:border-[#C50337]/40 transition"
               />
               <p className="mt-1.5 text-xs text-zinc-600">Maksimum 50 simvol.</p>
             </div>
@@ -172,7 +172,7 @@ export default function ProfileForm({
               </div>
             )}
             {fullNameState.success && (
-              <div className="rounded-xl border border-[#00e5a0]/20 bg-[#00e5a0]/10 px-4 py-3 text-sm text-[#00e5a0]">
+              <div className="rounded-xl border border-[#C50337]/20 bg-[#C50337]/10 px-4 py-3 text-sm text-[#C50337]">
                 {fullNameState.success}
               </div>
             )}
@@ -180,7 +180,7 @@ export default function ProfileForm({
             <button
               type="submit"
               disabled={fullNamePending}
-              className="w-full rounded-xl bg-[#00e5a0] px-5 py-3 text-sm font-bold text-black transition
+              className="w-full rounded-xl bg-[#C50337] px-5 py-3 text-sm font-bold text-white transition
                 hover:bg-[#00cc8e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {fullNamePending ? 'Saxlanılır...' : 'Adı yenilə'}
@@ -195,14 +195,14 @@ export default function ProfileForm({
 
         <div className="mt-5 space-y-3">
           {payments.length === 0 ? (
-            <div className="rounded-xl border border-white/5 bg-[#080e1a] px-4 py-6 text-center text-sm text-zinc-500">
+            <div className="rounded-xl border border-white/5 bg-[#02060E] px-4 py-6 text-center text-sm text-zinc-500">
               Hələ ödəniş qeydi yoxdur.
             </div>
           ) : (
             payments.map((payment: any) => (
               <div
                 key={payment.id}
-                className="rounded-xl border border-white/5 bg-[#080e1a] px-4 py-4"
+                className="rounded-xl border border-white/5 bg-[#02060E] px-4 py-4"
               >
                 <div className="flex items-center justify-between gap-4">
                   <div>
@@ -219,7 +219,7 @@ export default function ProfileForm({
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       payment.status === 'completed'
-                        ? 'bg-[#00e5a0]/10 text-[#00e5a0] border border-[#00e5a0]/20'
+                        ? 'bg-[#C50337]/10 text-[#C50337] border border-[#C50337]/20'
                         : payment.status === 'failed'
                         ? 'bg-red-500/10 text-red-400 border border-red-500/20'
                         : 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'

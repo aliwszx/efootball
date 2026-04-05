@@ -24,7 +24,7 @@ export default function PaymentStatusForm({
         <select
           name="status"
           defaultValue={currentStatus || 'pending'}
-          className="rounded-xl border border-white/10 bg-black/20 px-3 py-2 text-sm text-white outline-none"
+          className="rounded-xl border border-[#C50337]/15 bg-[#C50337]/5 px-3 py-2 text-sm text-white outline-none"
         >
           <option value="pending">pending</option>
           <option value="completed">completed</option>
@@ -34,14 +34,14 @@ export default function PaymentStatusForm({
         <button
           type="submit"
           disabled={pending}
-          className="rounded-xl bg-gradient-to-r from-cyan-400 to-blue-600 px-4 py-2 text-sm font-semibold text-black transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
+          className="rounded-xl bg-gradient-to-r from-[#C50337] to-[#8B0224] px-4 py-2 text-sm font-semibold text-white transition hover:scale-[1.01] disabled:cursor-not-allowed disabled:opacity-70"
         >
           {pending ? 'Yenilənir...' : 'Yadda saxla'}
         </button>
       </div>
 
       {state?.error && <p className="text-xs text-red-300">{state.error}</p>}
-      {state?.success && <p className="text-xs text-emerald-300">{state.success}</p>}
+      {state?.success && <p className="text-xs text-[#ff4d6d]">{state.success}</p>}
     </form>
   )
 }

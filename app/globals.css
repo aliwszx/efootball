@@ -1,9 +1,15 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-dm-sans), 'DM Sans', sans-serif;
-  --font-display: var(--font-syne), 'Syne', sans-serif;
+  --font-inter: var(--font-inter), 'Inter', sans-serif;
+  --font-poppins: var(--font-poppins), 'Poppins', sans-serif;
+  --font-open-sans: var(--font-open-sans), 'Open Sans', sans-serif;
 }
+
+/* Utility aliases */
+.font-inter    { font-family: var(--font-inter); }
+.font-poppins  { font-family: var(--font-poppins); }
+.font-open-sans { font-family: var(--font-open-sans); }
 
 :root {
   color-scheme: dark;
@@ -25,13 +31,24 @@ a {
 
 input, textarea, select {
   outline: none;
-  font-family: inherit;
+  font-family: var(--font-inter);
 }
 
+/* Headings → Poppins */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display);
+  font-family: var(--font-poppins);
   letter-spacing: -0.02em;
   margin: 0;
+}
+
+/* Body / UI → Inter (default) */
+body {
+  font-family: var(--font-inter);
+}
+
+/* SEO / long-form content → Open Sans via .prose or .seo class */
+.prose, .seo, p.description, p.seo-text {
+  font-family: var(--font-open-sans);
 }
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }

@@ -5,121 +5,94 @@ import { setFeaturedTournament } from '@/app/actions/tournaments'
 
 export default async function AdminTournamentsPage() {
   const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/login')
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
-
-  if (!profile || profile.role !== 'admin') {
-    redirect('/dashboard')
-  }
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', user.id).single()
+  if (!profile || profile.role !== 'admin') redirect('/dashboard')
 
   const { data: tournaments, error } = await supabase
     .from('tournaments')
-    .select(`
-      id,
-      title,
-      slug,
-      platform,
-      status,
-      start_time,
-      is_featured
-    `)
+    .select('id, title, slug, platform, status, start_time, is_featured')
     .order('created_at', { ascending: false })
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8 flex items-center justify-between gap-4">
-        <div>
-          <p className="mb-2 text-sm uppercase tracking-[0.2em] text-cyan-300">
-            Admin panel
-          </p>
-          <h1 className="text-4xl font-bold">Turnirlərin idarəsi</h1>
-        </div>
+    <main className="min-h-screen px-4 py-10 text-white sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-6xl">
 
-        <Link
-          href="/admin/tournaments/new"
-          className="rounded-2xl bg-gradient-to-r from-cyan-400 to-blue-600 px-5 py-3 font-semibold text-black"
-        >
-          Yeni turnir
-        </Link>
-      </div>
+        {/* Header */}
+        <section className="relative overflow-hidden rounded-[28px] border border-[#C50337]/20 bg-[#C50337]/5 p-7 backdrop-blur-xl sm:p-10">
+          <div className="absolute inset-0 -z-10 bg-gradient-to-br from-[#C50337]/10 via-transparent to-[#8B0224]/5" />
+          <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full border border-[#C50337]/25 bg-[#C50337]/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-[#ff4d6d]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#ff4d6d]" /> Admin Panel
+              </div>
+              <h1 className="text-4xl font-bold sm:text-5xl" style={{ fontFamily: 'var(--font-poppins)' }}>Turnirlərin idarəsi</h1>
+            </div>
+            <Link href="/admin/tournaments/new"
+              className="inline-flex shrink-0 items-center gap-2 rounded-xl bg-gradient-to-r from-[#C50337] to-[#8B0224] px-5 py-3 font-semibold text-white shadow-lg shadow-[#C50337]/20 transition hover:scale-[1.02] hover:shadow-[#C50337]/35">
+              + Yeni turnir
+            </Link>
+          </div>
+        </section>
 
-      {error && (
-        <div className="rounded-2xl border border-red-400/20 bg-red-500/10 p-4 text-red-300">
-          Xəta: {error.message}
-        </div>
-      )}
+        {error && (
+          <div className="mt-6 rounded-2xl border border-red-500/20 bg-red-500/8 p-4 text-sm text-red-300">
+            Xəta: {error.message}
+          </div>
+        )}
 
-      {!tournaments?.length ? (
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-10 text-center backdrop-blur">
-          Hələ turnir yoxdur.
-        </div>
-      ) : (
-        <div className="space-y-4">
-          {tournaments.map((t) => (
-            <div
-              key={t.id}
-              className="flex flex-col gap-4 rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-xl lg:flex-row lg:items-center lg:justify-between"
-            >
+        <div className="mt-6 space-y-3">
+          {!tournaments?.length ? (
+            <div className="rounded-[24px] border border-[#C50337]/10 bg-[#C50337]/4 p-10 text-center text-zinc-500">
+              Hələ turnir yoxdur.
+            </div>
+          ) : tournaments.map((t) => (
+            <div key={t.id}
+              className="flex flex-col gap-4 rounded-[24px] border border-[#C50337]/10 bg-[#C50337]/4 p-5 backdrop-blur-xl transition hover:border-[#C50337]/20 hover:bg-[#C50337]/7 lg:flex-row lg:items-center lg:justify-between">
               <div>
-                <div className="mb-2 flex flex-wrap items-center gap-3">
-                  <h2 className="text-2xl font-semibold">{t.title}</h2>
-
+                <div className="mb-2 flex flex-wrap items-center gap-2">
+                  <h2 className="text-xl font-semibold text-white" style={{ fontFamily: 'var(--font-poppins)' }}>{t.title}</h2>
                   {t.is_featured && (
-                    <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium text-emerald-300">
+                    <span className="rounded-full border border-[#C50337]/25 bg-[#C50337]/10 px-2.5 py-0.5 text-xs font-medium text-[#ff4d6d]">
                       Featured
                     </span>
                   )}
-
-                  <span className="rounded-full border border-white/10 bg-black/20 px-3 py-1 text-xs text-zinc-300">
+                  <span className="rounded-full border border-zinc-600/30 bg-zinc-600/10 px-2.5 py-0.5 text-xs text-zinc-400">
                     {t.status}
                   </span>
                 </div>
-
-                <div className="space-y-1 text-sm text-zinc-400">
-                  <p>Slug: {t.slug}</p>
-                  <p>Platform: {t.platform}</p>
-                  <p>Start: {new Date(t.start_time).toLocaleString()}</p>
+                <div className="flex flex-wrap gap-x-5 gap-y-1 text-xs text-zinc-500">
+                  <span>Slug: {t.slug}</span>
+                  <span>Platform: {t.platform}</span>
+                  <span>Başlama: {new Date(t.start_time).toLocaleString('az-AZ')}</span>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-3">
-                <Link
-                  href={`/tournaments/${t.slug}`}
-                  className="rounded-2xl border border-white/10 bg-black/20 px-4 py-2 text-sm transition hover:bg-white/5"
-                >
+              <div className="flex flex-wrap gap-2">
+                <Link href={`/tournaments/${t.slug}`}
+                  className="rounded-xl border border-[#C50337]/15 bg-[#C50337]/8 px-4 py-2 text-sm text-zinc-300 transition hover:border-[#C50337]/25 hover:text-white">
                   Bax
                 </Link>
-
                 <form action={setFeaturedTournament}>
                   <input type="hidden" name="tournament_id" value={t.id} />
                   <button
-                    className={`rounded-2xl px-4 py-2 text-sm font-medium transition ${
+                    className={`rounded-xl px-4 py-2 text-sm font-medium transition ${
                       t.is_featured
-                        ? 'border border-emerald-400/20 bg-emerald-400/10 text-emerald-300'
-                        : 'bg-gradient-to-r from-emerald-400 to-cyan-400 text-black hover:scale-[1.02]'
+                        ? 'border border-[#C50337]/20 bg-[#C50337]/10 text-[#ff4d6d] cursor-default'
+                        : 'bg-gradient-to-r from-[#C50337] to-[#8B0224] text-white hover:scale-[1.02] shadow-md shadow-[#C50337]/20'
                     }`}
                     disabled={t.is_featured}
                   >
-                    {t.is_featured ? 'Featured seçilib' : 'Featured et'}
+                    {t.is_featured ? '★ Featured seçilib' : 'Featured et'}
                   </button>
                 </form>
               </div>
             </div>
           ))}
         </div>
-      )}
+      </div>
     </main>
   )
 }
