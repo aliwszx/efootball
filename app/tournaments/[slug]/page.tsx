@@ -31,6 +31,7 @@ export default async function TournamentDetailPage({
 
   let alreadyJoined = false
   let confirmedCount = 0
+  let registrationStatus: string | null = null
 
   const { count } = await supabase
     .from('tournament_registrations')
@@ -63,9 +64,7 @@ export default async function TournamentDetailPage({
       .maybeSingle()
 
     alreadyJoined = !!registration
-    var registrationStatus = registration?.registration_status || null
-  } else {
-    var registrationStatus: string | null = null
+    registrationStatus = registration?.registration_status || null
   }
 
   const isFull = confirmedCount >= tournament.max_players
