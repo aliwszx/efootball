@@ -85,7 +85,7 @@ export default function ProfileForm({
               type="submit"
               disabled={avatarPending}
               className="w-full rounded-xl bg-[#C50337] px-5 py-3 text-sm font-bold text-white transition
-                hover:bg-[#00cc8e] disabled:cursor-not-allowed disabled:opacity-50"
+                hover:bg-[#a5022e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {avatarPending ? 'Yüklənir...' : 'Şəkli yenilə'}
             </button>
@@ -135,7 +135,7 @@ export default function ProfileForm({
               type="submit"
               disabled={usernamePending}
               className="w-full rounded-xl bg-[#C50337] px-5 py-3 text-sm font-bold text-white transition
-                hover:bg-[#00cc8e] disabled:cursor-not-allowed disabled:opacity-50"
+                hover:bg-[#a5022e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {usernamePending ? 'Saxlanılır...' : 'Usernamei yenilə'}
             </button>
@@ -181,7 +181,7 @@ export default function ProfileForm({
               type="submit"
               disabled={fullNamePending}
               className="w-full rounded-xl bg-[#C50337] px-5 py-3 text-sm font-bold text-white transition
-                hover:bg-[#00cc8e] disabled:cursor-not-allowed disabled:opacity-50"
+                hover:bg-[#a5022e] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {fullNamePending ? 'Saxlanılır...' : 'Adı yenilə'}
             </button>
