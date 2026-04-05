@@ -24,12 +24,12 @@ const STAGE_LABELS: Record<string, string> = {
   finished: 'Tamamlandı',
 }
 
-function getKnockoutStages() {
-  return ['quarterfinal', 'semifinal', 'final'] as const
+function getKnockoutStages(): string[] {
+  return ['quarterfinal', 'semifinal', 'final']
 }
 
-function getLeagueStages() {
-  return ['league', 'playoff', 'round_of_16', 'quarterfinal', 'semifinal', 'final'] as const
+function getLeagueStages(): string[] {
+  return ['league', 'playoff', 'round_of_16', 'quarterfinal', 'semifinal', 'final']
 }
 
 function getParticipantUsername(participant: any) {
@@ -734,9 +734,9 @@ export default async function TournamentDetailPage({
             <div className="mt-6 rounded-2xl border border-white/10 bg-black/20 p-4">
               <p className="mb-3 text-sm text-zinc-400">Mərhələ</p>
               <div className="space-y-2">
-                {stageOrder.map((stage) => {
-                  const currentIdx = stageOrder.indexOf(tournament.competition_stage as any)
-                  const thisIdx = stageOrder.indexOf(stage)
+                {stageOrder.map((stage: string) => {
+  const currentIdx = stageOrder.indexOf(tournament.competition_stage as string)
+  const thisIdx = stageOrder.indexOf(stage)
                   const isDone = currentIdx !== -1 && thisIdx < currentIdx
                   const isCurrent = thisIdx === currentIdx
 
