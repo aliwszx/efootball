@@ -308,8 +308,8 @@ export default async function TournamentDetailPage({
                         <th className="pb-3 pr-3 text-center font-medium">Q</th>
                         <th className="pb-3 pr-3 text-center font-medium">H</th>
                         <th className="pb-3 pr-3 text-center font-medium">M</th>
+                        <th className="pb-3 pr-3 text-center font-medium">Qol</th>
                         <th className="pb-3 pr-3 text-center font-medium">QF</th>
-                        <th className="pb-3 pr-3 text-center font-medium">GF</th>
                         <th className="pb-3 font-medium text-center text-white">Xal</th>
                       </tr>
                     </thead>
@@ -338,7 +338,11 @@ export default async function TournamentDetailPage({
                             <td className="py-3 pr-3">
                               <div className="flex items-center gap-2">
                                 <span className="font-medium text-white">{row.username}</span>
-                                <span className={`text-xs ${style.labelClass}`}>{style.label}</span>
+                                <span className={`rounded-md px-1.5 py-0.5 text-[10px] font-bold tracking-wide ${
+                                  style.label === 'R16' ? 'bg-emerald-500/15 text-emerald-400' :
+                                  style.label === 'PO'  ? 'bg-amber-500/15 text-amber-400' :
+                                                          'bg-red-500/15 text-red-400'
+                                }`}>{style.label}</span>
                               </div>
                             </td>
                             <td className="py-3 pr-3 text-center text-zinc-300">{row.played}</td>
@@ -367,7 +371,7 @@ export default async function TournamentDetailPage({
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-emerald-500" />1–8: 1/8 Finala birbaşa</span>
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-amber-500" />9–24: Play-off</span>
                 <span className="flex items-center gap-1.5"><span className="h-2 w-2 rounded-full bg-red-600" />25+: Çıxır</span>
-                <span className="ml-auto">O=Oyun  Q=Qələbə  H=Heç  M=Məğlubiyyət  QF=Qol fərqi</span>
+                <span className="ml-auto">O=Oyun  Q=Qələbə  H=Heç  M=Məğlubiyyət  Qol=Vurulmuş:Buraxılmış  QF=Qol fərqi</span>
               </div>
             </div>
           )}
