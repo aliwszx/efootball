@@ -31,9 +31,10 @@ export async function updateProfileAvatar(
   if (!avatar || avatar.size === 0) {
     return { error: 'Şəkil seçilməyib.' }
   }
-  if (!avatar.type.startsWith('image/')) {
-    return { error: 'Yalnız şəkil faylı yükləyə bilərsən.' }
-  }
+  const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']
+if (!allowedTypes.includes(avatar.type)) {
+  return { error: 'Yalnız JPEG, PNG, WEBP və ya GIF faylı yükləyə bilərsən.' }
+}
   // 5 MB-a qədər qəbul et — sharp sıxışdıracaq
   const maxSize = 5 * 1024 * 1024
   if (avatar.size > maxSize) {
