@@ -753,18 +753,24 @@ export async function adminResolveLeagueDispute(
     return { error: 'Final score düzgün deyil.' }
   }
 
-  const { data: match, error: matchError } = await supabase
+  const { data: leagueMatch } = await supabase
     .from('league_matches')
-    .select(`
-      id,
-      tournament_id,
-      home_participant_id,
-      away_participant_id
-    `)
+    .select(`id, tournament_id, home_participant_id, away_participant_id`)
     .eq('id', matchId)
     .maybeSingle()
 
-  if (matchError || !match) {
+  const { data: knockoutMatch } = !leagueMatch
+    ? await supabase
+        .from('knockout_matches')
+        .select(`id, tournament_id, home_participant_id, away_participant_id`)
+        .eq('id', matchId)
+        .maybeSingle()
+    : { data: null }
+
+  const match = leagueMatch ?? knockoutMatch
+  const resolveTable = leagueMatch ? 'league_matches' : 'knockout_matches'
+
+  if (!match) {
     return { error: 'Matç tapılmadı.' }
   }
 
@@ -776,7 +782,7 @@ export async function adminResolveLeagueDispute(
   )
 
   const { error: matchUpdateError } = await supabase
-    .from('league_matches')
+    .from(resolveTable)
     .update({
       home_score: finalHomeScore,
       away_score: finalAwayScore,
