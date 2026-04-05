@@ -32,10 +32,13 @@ export async function GET(request: Request) {
           user.id.slice(0, 8)
         )
 
+        // full_name register zamanı user_metadata-ya yazılır
+        const fullName = String(user.user_metadata?.full_name || '').trim()
+
         await supabase.from('profiles').insert({
           id: user.id,
           username,
-          full_name: '',
+          full_name: fullName,
         })
       }
     }
